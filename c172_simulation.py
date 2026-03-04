@@ -4,7 +4,7 @@ from integrators import RK4
 from scipy.integrate import solve_ivp
 from aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics
 from drag_polar import drag_polar
-from C172_params import params, t0, tf, dt, U_0, alt_0
+from c172_params import params, t0, tf, dt, U_0, alt_0
 
 
 ## Performance Calculations
@@ -71,6 +71,7 @@ axs[5].grid(True)
 
 plt.tight_layout()
 plt.show()
+
 
 
 
