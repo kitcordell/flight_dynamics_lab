@@ -1,9 +1,13 @@
 import numpy as np
 
+
 t0 = 0
 tf = 200
 dt = 0.01
-U_0 = 110 * 1.6 # initial velocity, [ft/s]
+# U_0 = 150  # initial forward, [ft/s]
+# W_0 = 0 # iniitial vertical velocity, [ft/s]
+# Q_0 = 0 # initial pitch rate [rad/s]
+theta_0 = np.deg2rad(2.668464681535553)
 alt_0 = 5000
 
 
@@ -20,9 +24,12 @@ params = {
     "V_S" : 40,
     "V_ne" : 400,
     
+    "V_trim": 150.0,   # ft/s
+    "gamma_trim": 0, # flight path angle, [deg]
+    
     "W": 2500,                                # aircraft weight, [lb]
-    "delta_e": np.deg2rad(-5),                 # elevator deflection, [rad]
-    "thrust": 0,                              # total thrust in, [lb]
+    "delta_e": np.deg2rad(-2.5268517650491225),                 # elevator deflection, [rad]
+    "thrust": 217.05256710180734,                              # total thrust in, [lb]
 
     # Lift coefficients
     "C_L_alpha": 5.143,

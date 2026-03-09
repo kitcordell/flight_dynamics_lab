@@ -2,14 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 from integrators import RK4
 from scipy.integrate import solve_ivp
+from scipy.optimize import root
+
 from aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics
 from drag_polar import drag_polar
-from c172_params import params, t0, tf, dt, U_0, alt_0
+from elevator_trim_solver import aircraft_longitudinal_trim_solver
+from c172_params import params, t0, tf, dt, alt_0, theta_0
 
 
-## Performance Calculations
 
-# Drag Polar Plots
+
+
+## Drag Polar Plots
 V, D, D_i, D_p = drag_polar(alt_0, params,)
 plt.plot(V[:], D[:], label = "Total Drag")
 plt.plot(V, D_i[:], label = "Induced Drag")
@@ -21,12 +25,56 @@ plt.xlabel("Velocity (kts)")
 
 
 
+## Trim Solver
 
+# initial guess
+x0 = np.array([
+    300.0,               # thrust guess [lb]
+    np.deg2rad(-2.0),    # delta_e guess [rad]
+    np.deg2rad(3.0),     # theta guess [rad]
+])
+
+sol = root(aircraft_longitudinal_trim_solver, x0, args=(params,), method="hybr")
+thrust_trim, delta_e_trim, theta_trim = sol.x
+
+print("success:", sol.success)
+print("message:", sol.message)
+print("thrust trim [lb]:", thrust_trim)
+print("delta_e trim [deg]:", np.rad2deg(delta_e_trim))
+print("theta trim [deg]:", np.rad2deg(theta_trim))
+print("trim residuals:", aircraft_longitudinal_trim_solver(sol.x, params))
+
+V = params["V_trim"]
+
+
+alpha_trim = theta_trim 
+
+U_0 = V * np.cos(alpha_trim)
+W_0 = V * np.sin(alpha_trim)
+Q_0 = 0.0
+
+
+x_trim = np.array([U_0, W_0, Q_0, theta_trim, alt_0])
+
+params["thrust"] = thrust_trim
+params["delta_e"] = delta_e_trim
+
+
+xdot_trim = aircraft_longitudinal_dynamics(0.0, x_trim, params)
+
+print("u_dot     =", xdot_trim[0])
+print("w_dot     =", xdot_trim[1])
+print("q_dot     =", xdot_trim[2])
+print("theta_dot =", xdot_trim[3])
+print("h_dot     =", xdot_trim[4])
+
+
+print(Q_0)
 ## Dynamics Calculations
     # Uses RK4 script for numerical integration and aircraft_longitudinal_dynamics EOM script
 
-t_rk4, x_rk4 = RK4(aircraft_longitudinal_dynamics, (0.0, tf), [U_0, 0, 0, 0, alt_0], dt, args=(params,))
-sol = solve_ivp(aircraft_longitudinal_dynamics, (t0,tf), [U_0,0,0,0,alt_0], args=(params,), method='RK45')
+t_rk4, x_rk4 = RK4(aircraft_longitudinal_dynamics, (0.0, tf), [U_0, W_0, Q_0, theta_0, alt_0], dt, args=(params,))
+sol = solve_ivp(aircraft_longitudinal_dynamics, (t0,tf), [U_0*np.cos(theta_0),U_0*np.sin(theta_0),0,theta_0,alt_0], args=(params,), method='RK45')
 
 
 alpha = np.arctan2(x_rk4[:,1], x_rk4[:,0]) # angle of attack calculated from forward and vertical velocity, [rad]
@@ -34,9 +82,9 @@ alpha = np.arctan2(x_rk4[:,1], x_rk4[:,0]) # angle of attack calculated from for
 # Dynamics Plots
 fig, axs = plt.subplots(6, 1, figsize=(9,10), sharex=True)
 
-axs[0].plot(t_rk4, x_rk4[:,0]/1.68, color="royalblue", linewidth=2)
-axs[0].set_ylabel("u (kts)")
-axs[0].set_title("Nonlinear Longitudinal Aircraft States (RK2)")
+axs[0].plot(t_rk4, x_rk4[:,0], color="royalblue", linewidth=2)
+axs[0].set_ylabel("u (ft/s)")
+axs[0].set_title("Nonlinear Longitudinal Aircraft States (RK4)")
 axs[0].legend(["u — forward body velocity"])
 axs[0].grid(True)
 
@@ -71,8 +119,6 @@ axs[5].grid(True)
 
 plt.tight_layout()
 plt.show()
-
-
 
 
 

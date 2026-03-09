@@ -3,7 +3,7 @@ import numpy as np
 
 
 def aircraft_longitudinal_dynamics(t,x, params):
-    u, w, q, theta = x
+    U, W, Q, theta, alt = x
     
 
 
@@ -20,9 +20,9 @@ def aircraft_longitudinal_dynamics(t,x, params):
     I_yy = params["I_yy"]                     # moment of inertia about pitch axis, [slug*ft^2]
     m = params["W"] / g                       # aircraft mass, [slugs]
     
-    V = np.sqrt(u**2+w**2)
+    V = np.sqrt(U**2+W**2)
     qbar = 0.5 * rho * V**2 # dynamic pressure, [lb/ft^2]
-    alpha = np.arctan2(w,u)
+    alpha = np.arctan2(W,U)
     
     # Lift Calculations
     C_L_alpha   = params["C_L_alpha"]
@@ -47,7 +47,7 @@ def aircraft_longitudinal_dynamics(t,x, params):
     # Pitching Moment Calculation
 
 
-    C_m = C_m_0 + C_m_alpha * alpha + C_m_delta_e * delta_e + C_mq * ((q*cbar)/(2*V))
+    C_m = C_m_0 + C_m_alpha * alpha + C_m_delta_e * delta_e + C_mq * ((Q*cbar)/(2*V))
     M = qbar * S * cbar * C_m
 
     
@@ -58,10 +58,11 @@ def aircraft_longitudinal_dynamics(t,x, params):
     xdot = np.zeros_like(x)
 
 
-    xdot[0] = X/m - g*np.sin(theta) - q*w
-    xdot[1] = Z/m + g*np.cos(theta) + q*u
+    xdot[0] = X/m - g*np.sin(theta) - Q*W
+    xdot[1] = Z/m + g*np.cos(theta) + Q*U
     xdot[2] = M/I_yy
-    xdot[3] = q
+    xdot[3] = Q
+    xdot[4] = U * np.sin(theta) - W * np.cos(theta)
 
     
 
