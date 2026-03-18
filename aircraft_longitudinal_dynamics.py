@@ -36,8 +36,11 @@ def aircraft_longitudinal_dynamics(t,x, params):
     C_mq        = params["C_mq"]
     C_m_0       = params["C_m_0"]
   
-    
-    C_L = C_L_0 + C_L_alpha * alpha +C_L_delta_e * delta_e  # coefficient of lift
+   ## Elevator Input Function
+    delta_e = elevator_deflection(t, delta_e)
+
+
+    C_L = C_L_0 + C_L_alpha * alpha + C_L_delta_e * delta_e  # coefficient of lift
     L = qbar * S * C_L # total lift
 
     # Drag Calculations
@@ -47,22 +50,22 @@ def aircraft_longitudinal_dynamics(t,x, params):
     # Pitching Moment Calculation
 
 
-    C_m = C_m_0 + C_m_alpha * alpha + C_m_delta_e * delta_e + C_mq * ((Q*cbar)/(2*V))
-    M = qbar * S * cbar * C_m
+    C_m = C_m_0 + C_m_alpha * alpha + C_m_delta_e * delta_e + C_mq * ((Q*cbar)/(2*V)) # pitching moment coefficient
+    M = qbar * S * cbar * C_m   # pitching moment
 
     
-    X = -D * np.cos(alpha) + L * np.sin(alpha) + thrust
-    Z = -D * np.sin(alpha) - L * np.cos(alpha)
+    X = -D * np.cos(alpha) + L * np.sin(alpha) + thrust # X forces
+    Z = -D * np.sin(alpha) - L * np.cos(alpha)  # Y forces
     
 
-    xdot = np.zeros_like(x)
+    xdot = np.zeros_like(x)     # initialize derivative array
 
 
-    xdot[0] = X/m - g*np.sin(theta) - Q*W
-    xdot[1] = Z/m + g*np.cos(theta) + Q*U
-    xdot[2] = M/I_yy
-    xdot[3] = Q
-    xdot[4] = U * np.sin(theta) - W * np.cos(theta)
+    xdot[0] = X/m - g*np.sin(theta) - Q*W   # X accelerations
+    xdot[1] = Z/m + g*np.cos(theta) + Q*U   # Z accelerations
+    xdot[2] = M/I_yy    # pitch acceleration
+    xdot[3] = Q # pitch rate
+    xdot[4] = U * np.sin(theta) - W * np.cos(theta) # change in altitude
 
     
 
@@ -70,3 +73,12 @@ def aircraft_longitudinal_dynamics(t,x, params):
 
 
 
+def elevator_deflection(t, delta_e):
+    if t > 25 and t < 26.4:
+        delta_e = delta_e + np.deg2rad(-2.164)
+
+    else:
+
+        delta_e = delta_e
+
+    return delta_e

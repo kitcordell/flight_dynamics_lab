@@ -3,11 +3,13 @@ import matplotlib.pyplot as plt
 from integrators import RK4
 from scipy.integrate import solve_ivp
 from scipy.optimize import root
+import pandas as pd
 
-from aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics
+from aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics, elevator_deflection
 from drag_polar import drag_polar
 from elevator_trim_solver import aircraft_longitudinal_trim_solver
-from c172_params import params, t0, tf, dt, alt_0, theta_0
+from c172_params import params, t0, tf, dt, alt_0
+
 
 
 
@@ -69,18 +71,22 @@ print("theta_dot =", xdot_trim[3])
 print("h_dot     =", xdot_trim[4])
 
 
-print(Q_0)
+
 ## Dynamics Calculations
     # Uses RK4 script for numerical integration and aircraft_longitudinal_dynamics EOM script
 
-t_rk4, x_rk4 = RK4(aircraft_longitudinal_dynamics, (0.0, tf), [U_0, W_0, Q_0, theta_0, alt_0], dt, args=(params,))
-sol = solve_ivp(aircraft_longitudinal_dynamics, (t0,tf), [U_0*np.cos(theta_0),U_0*np.sin(theta_0),0,theta_0,alt_0], args=(params,), method='RK45')
-
+t_rk4, x_rk4 = RK4(aircraft_longitudinal_dynamics, (0.0, tf), [U_0, W_0, Q_0, theta_trim, alt_0], dt, args=(params,))
 
 alpha = np.arctan2(x_rk4[:,1], x_rk4[:,0]) # angle of attack calculated from forward and vertical velocity, [rad]
 
+
+
+elevator_deflection_history = np.zeros_like(t_rk4) # initialize elevator deflection array with same dimensions as time vector
+for i in range(len(t_rk4)):
+    elevator_deflection_history[i] = elevator_deflection(t_rk4[i], params["delta_e"]) # plugs in all values of "t" into the elevator function and stores then in an array
+
 # Dynamics Plots
-fig, axs = plt.subplots(6, 1, figsize=(9,10), sharex=True)
+fig, axs = plt.subplots(7, 1, figsize=(9,10), sharex=True)
 
 axs[0].plot(t_rk4, x_rk4[:,0], color="royalblue", linewidth=2)
 axs[0].set_ylabel("u (ft/s)")
@@ -116,9 +122,45 @@ axs[5].set_xlabel("Time (s)")
 axs[5].legend(["Altitude"])
 axs[5].grid(True)
 
+axs[6].plot(t_rk4,np.rad2deg(elevator_deflection_history), color="purple", linewidth=2)
+axs[6].set_ylabel("Elevator Deflection (deg)")
+axs[6].set_xlabel("Time (s)")
+axs[6].legend(["Elevator Deflection"])
+axs[6].grid(True)
+
 
 plt.tight_layout()
 plt.show()
 
 
 
+data = pd.read_csv(
+    "Data.txt",
+    sep="|",
+    engine="python",
+    skipinitialspace=True
+)
+
+
+print(data.columns.tolist())
+
+print(data.head())
+
+data = data.iloc[6000:9000]
+print(data)
+time = data["_totl,_time "]
+
+print(time.iloc[1])
+
+time = time - time.iloc[1]
+
+print(time.iloc[1])
+
+pitch = data["pitch,__deg "]
+elevator_deflection = data["elev1,__deg .1"]
+
+
+plt.plot(time,pitch, label = "pitch angle")
+plt.plot(time,elevator_deflection, label = "elevator deflection")
+plt.legend()
+plt.show()
