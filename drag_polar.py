@@ -26,7 +26,7 @@ def drag_polar(alt_0, params,):
     AR = params["bw"] / params["cbar"]
 
     qbar = 0.5 * rho * V**2
-    # C_L = zeros
+
     C_L = W / ( qbar * S ) # lift coefficient where lift equals weight
     
     C_D_i = C_L**2 / (np.pi * e * AR)

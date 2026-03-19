@@ -2,9 +2,10 @@ import numpy as np
 
 
 t0 = 0
-tf = 200
+tf = 115
 dt = 0.01
 alt_0 = 5000
+
 
 
 params = {
@@ -17,13 +18,13 @@ params = {
     "e" : 0.7,                                # oswald efficiency factor
     "S" : 175,                                # wing area, [ft^2]
 
-    "V_S" : 40,
-    "V_ne" : 400,
+    "V_S" : 45,
+    "V_ne" : 170,
     
     "V_trim": 90.0,   # trimmed free stream velocity, [t/s]  
     "gamma_trim": 0, # flight path angle, [deg]
     
-    "W": 2500,                                # aircraft weight, [lb]
+    "W": 2300,                                # aircraft weight, [lb]
     # "delta_e_trim": np.deg2rad(-2.5268517650491225),                 # elevator deflection, [rad]
     # "thrust": 217.05256710180734,                              # total thrust in, [lb]
 

@@ -1,4 +1,5 @@
 import numpy as np
+from standard_atmosphere_imperial import standard_atmosphere_imperial
 
 
 
@@ -8,7 +9,6 @@ def aircraft_longitudinal_dynamics(t,x, params):
 
 
     g = params["g"]
-    rho = params["rho"]                       # air density, [slug/ft^3]
     bw = params["bw"]                         # wing span, [ft]
     cbar = params["cbar"]                     # average chord, [ft]
     S = bw * cbar                             # wing surface area [ft^2]
@@ -19,8 +19,10 @@ def aircraft_longitudinal_dynamics(t,x, params):
 
     I_yy = params["I_yy"]                     # moment of inertia about pitch axis, [slug*ft^2]
     m = params["W"] / g                       # aircraft mass, [slugs]
+
+    rho, _, _ = standard_atmosphere_imperial(alt)   # air density calculatino
     
-    V = np.sqrt(U**2+W**2)
+    V = np.sqrt(U**2+W**2)                  #  resolved aircraft velocity
     qbar = 0.5 * rho * V**2 # dynamic pressure, [lb/ft^2]
     alpha = np.arctan2(W,U)
     
@@ -74,7 +76,7 @@ def aircraft_longitudinal_dynamics(t,x, params):
 
 
 def elevator_deflection(t, delta_e):
-    if t > 25 and t < 26.4:
+    if t > 5.6 and t < 6.6:
         delta_e = delta_e + np.deg2rad(-2.164)
 
     else:
