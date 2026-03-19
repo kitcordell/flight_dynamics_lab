@@ -4,7 +4,7 @@ import numpy as np
 t0 = 0
 tf = 115
 dt = 0.01
-alt_0 = 5000
+alt_0 = 4000
 
 
 
@@ -21,8 +21,8 @@ params = {
     "V_S" : 45,
     "V_ne" : 170,
     
-    "V_trim": 90.0,   # trimmed free stream velocity, [t/s]  
-    "gamma_trim": 0, # flight path angle, [deg]
+    "V_trim": 150.0,   # trimmed free stream velocity, [ft/s]  
+    "gamma_trim": np.deg2rad(0.0), # flight path angle, [deg]
     
     "W": 2300,                                # aircraft weight, [lb]
     # "delta_e_trim": np.deg2rad(-2.5268517650491225),                 # elevator deflection, [rad]

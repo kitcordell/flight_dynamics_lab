@@ -12,7 +12,7 @@ def aircraft_longitudinal_dynamics(t,x, params):
     bw = params["bw"]                         # wing span, [ft]
     cbar = params["cbar"]                     # average chord, [ft]
     S = bw * cbar                             # wing surface area [ft^2]
-    AR = bw / cbar
+    AR = bw**2 / S
     delta_e = params["delta_e"]               # elevator deflection, [rad]
     thrust = params["thrust"]                 # total thrust in, [lb]
     K = params["K"]
