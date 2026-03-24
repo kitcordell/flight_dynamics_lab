@@ -57,17 +57,17 @@ def aircraft_longitudinal_dynamics(t,x, params):
 
     
     X = -D * np.cos(alpha) + L * np.sin(alpha) + thrust # X forces
-    Z = -D * np.sin(alpha) - L * np.cos(alpha)  # Y forces
+    Z = -D * np.sin(alpha) - L * np.cos(alpha)  # Z forces
     
 
     xdot = np.zeros_like(x)     # initialize derivative array
 
 
-    xdot[0] = X/m - g*np.sin(theta) - Q*W   # X accelerations
-    xdot[1] = Z/m + g*np.cos(theta) + Q*U   # Z accelerations
-    xdot[2] = M/I_yy    # pitch acceleration
-    xdot[3] = Q # pitch rate
-    xdot[4] = U * np.sin(theta) - W * np.cos(theta) # change in altitude
+    xdot[0] = X/m - g*np.sin(theta) - Q*W   # # U_dot
+    xdot[1] = Z/m + g*np.cos(theta) + Q*U   # W_dot
+    xdot[2] = M/I_yy    # Q_dot
+    xdot[3] = Q # theta_dot
+    xdot[4] = U * np.sin(theta) - W * np.cos(theta) # h_dot
 
     
 
