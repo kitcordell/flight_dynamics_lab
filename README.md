@@ -22,6 +22,7 @@ This project is part of a broader effort to better understand aircraft dynamics,
 The longitudinal state vector is:
 
 $$x = [U,\; W,\; Q,\; \theta,\; h]^T$$
+
 ---
 
 For this project, the longitudinal equations of motion in nonlinear state-space form are:
