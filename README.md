@@ -93,3 +93,12 @@ $$
   
 
 This formulation makes it possible to simulate the aircraft response over time and solve for trim conditions.
+
+
+## Example Plots
+
+### Drag Polar
+<img src="figures/drag_polar.png" alt="Drag Polar" width="400">
+
+### Longitudinal State-Response Comparison
+<img src="figures/sim_vs_xplane.png" alt="State-Response" width="500">

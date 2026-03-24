@@ -173,7 +173,7 @@ fig, axs = plt.subplots(7, 1, figsize=(9,10), sharex=True)
 axs[0].plot(t_rk4, x_rk4[:,0], color="red", linewidth=2)
 axs[0].plot(time_xplane, xplane_U, color="royalblue", linewidth=2, linestyle='dashed' )
 axs[0].set_ylabel("u (ft/s)")
-axs[0].set_title("Nonlinear Longitudinal Aircraft States (RK4)")
+axs[0].set_title("Nonlinear Longitudinal Aircraft States Comparison (RK4)")
 axs[0].legend(["Sim U", "X-Plane U"], loc="center right")
 axs[0].grid(True)
 
