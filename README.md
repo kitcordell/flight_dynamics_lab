@@ -26,6 +26,7 @@ $$x = [U,\; W,\; Q,\; \theta,\; h]^T$$
 ---
 
 For this project, the longitudinal equations of motion in nonlinear state-space form are:
+
   $$\dot{U}=\frac{X}{m}-g\sin(\theta)-QW$$
   $$\dot{W}=\frac{Z}{m}+g\cos(\theta)+QU$$
   $$\dot{Q}=\frac{M}{I_{yy}}$$
