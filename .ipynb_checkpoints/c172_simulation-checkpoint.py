@@ -1,10 +1,10 @@
+#%%
 import numpy as np
 import matplotlib.pyplot as plt
 from integrators import RK4
 from scipy.integrate import solve_ivp
 from scipy.optimize import root
 import pandas as pd
-
 from aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics, elevator_deflection
 from drag_polar import drag_polar
 from elevator_trim_solver import aircraft_longitudinal_trim_solver
@@ -14,16 +14,16 @@ from c172_params import params, t0, tf, dt, alt_0
 
 
 
-
+#%%
 ## Drag Polar Plots
 V, D, D_i, D_p = drag_polar(alt_0, params,)
-plt.plot(V[:], D[:], label = "Total Drag", linewidth=1)
-plt.plot(V, D_i[:], label = "Induced Drag", linewidth=1)
-plt.plot(V,D_p[:], label = "Parasite Drag", linewidth=1)
+plt.plot(V[:], D[:], label = "Total Drag")
+plt.plot(V, D_i[:], label = "Induced Drag")
+plt.plot(V,D_p[:], label = "Parasite Drag")
 plt.legend()
 plt.title("Drag Polar Curve, C172")
 plt.ylabel("Drag (lbf)")
-plt.xlabel("Velocity (ft/s)")
+plt.xlabel("Velocity (kts)")
 
 
 
@@ -90,6 +90,51 @@ for i in range(len(t_rk4)):
     elevator_deflection_history[i] = elevator_deflection(t_rk4[i], params["delta_e"]) # plugs in all values of "t" into the elevator function and stores then in an array
 
 
+
+## Dynamics Plots
+
+# fig, axs = plt.subplots(7, 1, figsize=(9,10), sharex=True)
+
+# axs[0].plot(t_rk4, x_rk4[:,0], color="royalblue", linewidth=2)
+# axs[0].set_ylabel("u (ft/s)")
+# axs[0].set_title("Nonlinear Longitudinal Aircraft States (RK4)")
+# axs[0].legend(["u — forward body velocity"])
+# axs[0].grid(True)
+
+# axs[1].plot(t_rk4, x_rk4[:,1], color="darkorange", linewidth=2)
+# axs[1].set_ylabel("w (ft/s)")
+# axs[1].legend(["w — vertical body velocity (z-axis, positive down)"])
+# axs[1].grid(True)
+
+# axs[2].plot(t_rk4, np.rad2deg(x_rk4[:,2]), color="forestgreen", linewidth=2)
+# axs[2].set_ylabel("q (deg/s)")
+# axs[2].legend(["q — pitch rate"])
+# axs[2].grid(True)
+
+# axs[3].plot(t_rk4, np.rad2deg(x_rk4[:,3]), color="crimson", linewidth=2)
+# axs[3].set_ylabel("θ (deg)")
+# axs[3].set_xlabel("Time (s)")
+# axs[3].legend(["θ — pitch angle (aircraft attitude)"])
+# axs[3].grid(True)
+
+# axs[4].plot(t_rk4, np.rad2deg(alpha), color="purple", linewidth=2)
+# axs[4].set_ylabel("α (deg)")
+# axs[4].set_xlabel("Time (s)")
+# axs[4].legend(["α — angle of attack"])
+# axs[4].grid(True)
+
+# axs[5].plot(t_rk4,x_rk4[:,4], color="purple", linewidth=2)
+# axs[5].set_ylabel("Altitude (ft)")
+# axs[5].set_xlabel("Time (s)")
+# axs[5].legend(["Altitude"])
+# axs[5].grid(True)
+
+# axs[6].plot(t_rk4,np.rad2deg(elevator_deflection_history), color="purple", linewidth=2)
+# axs[6].set_ylabel("Elevator Deflection (deg)")
+# axs[6].set_xlabel("Time (s)")
+# axs[6].legend(["Elevator Deflection"])
+# axs[6].grid(True)
+
 ## X-Plane Data
 
 data_xplane = pd.read_csv(         # read data
@@ -125,48 +170,48 @@ xplane_Q = data_xplane["____Q,deg/s "]
 # Comparison Plots
 fig, axs = plt.subplots(7, 1, figsize=(9,10), sharex=True)
 
-axs[0].plot(t_rk4, x_rk4[:,0], color="red", linewidth=1)
-axs[0].plot(time_xplane, xplane_U, color="royalblue", linewidth=1, linestyle='dashed' )
+axs[0].plot(t_rk4, x_rk4[:,0], color="red", linewidth=2)
+axs[0].plot(time_xplane, xplane_U, color="royalblue", linewidth=2, linestyle='dashed' )
 axs[0].set_ylabel("u (ft/s)")
 axs[0].set_title("Nonlinear Longitudinal Aircraft States Comparison (RK4)")
 axs[0].legend(["Sim U", "X-Plane U"], loc="center right")
 axs[0].grid(True)
 
-axs[1].plot(t_rk4, x_rk4[:,1], color="red", linewidth=1)
-axs[1].plot(time_xplane, xplane_W, color="royalblue", linewidth=1, linestyle='dashed' )
+axs[1].plot(t_rk4, x_rk4[:,1], color="red", linewidth=2)
+axs[1].plot(time_xplane, xplane_W, color="royalblue", linewidth=2, linestyle='dashed' )
 axs[1].set_ylabel("w (ft/s)")
 axs[1].legend(["Sim W", "X-Plane W"], loc="center right")
 axs[1].grid(True)
 
-axs[2].plot(t_rk4, np.rad2deg(x_rk4[:,2]), color="red", linewidth=1) 
-axs[2].plot(time_xplane, xplane_Q, color="royalblue", linewidth=1, linestyle='dashed' )       # Pitch Rate
+axs[2].plot(t_rk4, np.rad2deg(x_rk4[:,2]), color="red", linewidth=2) 
+axs[2].plot(time_xplane, xplane_Q, color="royalblue", linewidth=2, linestyle='dashed' )       # Pitch Rate
 axs[2].set_ylabel("Q (deg/s)")
 axs[2].legend(["Sim Q", "X-Plane Q"], loc="center right")
 axs[2].grid(True)
 
-axs[3].plot(t_rk4, np.rad2deg(x_rk4[:,3]), color="red", linewidth=1)                           # Pitch
-axs[3].plot(time_xplane, xplane_pitch, color="royalblue", linewidth=1, linestyle='dashed' )
+axs[3].plot(t_rk4, np.rad2deg(x_rk4[:,3]), color="red", linewidth=2)                           # Pitch
+axs[3].plot(time_xplane, xplane_pitch, color="royalblue", linewidth=2, linestyle='dashed' )
 axs[3].set_ylabel("θ (deg)")
 axs[3].set_xlabel("Time (s)")
 axs[3].legend(["Sim θ", "X-Plane θ"], loc="center right")
 axs[3].grid(True)
 
-axs[4].plot(t_rk4, np.rad2deg(alpha), color="red", linewidth=1)                             # Alpha
-axs[4].plot(time_xplane, xplane_alpha, color="royalblue", linewidth=1, linestyle='dashed')
+axs[4].plot(t_rk4, np.rad2deg(alpha), color="red", linewidth=2)                             # Alpha
+axs[4].plot(time_xplane, xplane_alpha, color="royalblue", linewidth=2, linestyle='dashed')
 axs[4].set_ylabel("α (deg)")
 axs[4].set_xlabel("Time (s)")
 axs[4].legend(["Sim α", "X-Plane α"], loc="center right")
 axs[4].grid(True)
 
-axs[5].plot(t_rk4,x_rk4[:,4], color="red", linewidth=1)                                 # Altitude
-axs[5].plot(time_xplane, xplane_alt, color="royalblue", linewidth=1, linestyle='dashed')
+axs[5].plot(t_rk4,x_rk4[:,4], color="red", linewidth=2)                                 # Altitude
+axs[5].plot(time_xplane, xplane_alt, color="royalblue", linewidth=2, linestyle='dashed')
 axs[5].set_ylabel("Altitude (ft)")
 axs[5].set_xlabel("Time (s)")
 axs[5].legend(["Sim alt", "X-Plane alt"], loc="center right")
 axs[5].grid(True)
 
-axs[6].plot(t_rk4,np.rad2deg(elevator_deflection_history), color="red", linewidth=1)
-axs[6].plot(time_xplane,xplane_elevator_deflection, color="royalblue", linewidth=1, linestyle ='dashed')
+axs[6].plot(t_rk4,np.rad2deg(elevator_deflection_history), color="red", linewidth=2)
+axs[6].plot(time_xplane,xplane_elevator_deflection, color="royalblue", linewidth=2, linestyle ='dashed')
 axs[6].set_ylabel("Elevator Deflection (deg)")
 axs[6].set_xlabel("Time (s)")
 axs[6].legend(["SimElevator Deflection", "X-Plane Elevator Deflection"], loc="center right")
