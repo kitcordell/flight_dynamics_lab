@@ -1,3 +1,4 @@
+#%% Imports
 import numpy as np
 import matplotlib.pyplot as plt
 from integrators import RK4
@@ -15,7 +16,7 @@ from c172_params import params, t0, tf, dt, alt_0
 
 
 
-## Drag Polar Plots
+#%% Drag Polar Plots
 V, D, D_i, D_p = drag_polar(alt_0, params,)
 plt.plot(V[:], D[:], label = "Total Drag", linewidth=1)
 plt.plot(V, D_i[:], label = "Induced Drag", linewidth=1)
@@ -27,7 +28,7 @@ plt.xlabel("Velocity (ft/s)")
 
 
 
-## Trim Solver
+#%% Trim Solver
 
 # initial guess
 x0 = np.array([
@@ -76,7 +77,7 @@ print("h_dot     =", xdot_trim[4])
 
 
 
-## Dynamics Calculations
+#%% Dynamics Calculations
     # Uses RK4 script for numerical integration and aircraft_longitudinal_dynamics EOM script
 
 t_rk4, x_rk4 = RK4(aircraft_longitudinal_dynamics, (0.0, tf), [U_0, W_0, Q_0, theta_trim, alt_0], dt, args=(params,))
@@ -89,8 +90,39 @@ elevator_deflection_history = np.zeros_like(t_rk4) # initialize elevator deflect
 for i in range(len(t_rk4)):
     elevator_deflection_history[i] = elevator_deflection(t_rk4[i], params["delta_e"]) # plugs in all values of "t" into the elevator function and stores then in an array
 
+#%% Rate of Climb Plot
 
-## X-Plane Data
+
+
+#%% POH Data
+roc_poh = pd.read_csv(         # read data
+    "c172_roc.csv",
+    sep=",",
+    engine="python",
+    skipinitialspace=True
+)
+
+print(roc_poh)
+
+poh_roc_alt = roc_poh["press_alt_ft"]
+poh_roc_0C = roc_poh["fpm_0C"]
+poh_roc_M20C = roc_poh["fpm_M20C"]
+poh_roc_20C = roc_poh["fpm_20C"]
+poh_roc_40C = roc_poh["fpm_40C"]
+
+plt.figure(2)
+plt.plot(poh_roc_alt, poh_roc_M20C, label="-20C", linewidth=1)
+plt.plot(poh_roc_alt, poh_roc_0C, label="0C", linewidth=1)
+plt.plot(poh_roc_alt, poh_roc_20C, label="20C", linewidth=1)
+plt.plot(poh_roc_alt, poh_roc_40C, label="40C", linewidth=1)
+
+plt.xlabel("Pressure Altitude (ft)")
+plt.ylabel("Rate of Climb (fpm)")
+plt.title("C172 Rate of Climb Performance (POH)")
+plt.legend()
+plt.grid(True)
+
+#%% X-Plane Data
 
 data_xplane = pd.read_csv(         # read data
     "Data.txt",
@@ -99,19 +131,12 @@ data_xplane = pd.read_csv(         # read data
     skipinitialspace=True
 )
 
-
 print(data_xplane.columns.tolist()) # print column names
-
-
-
 data_xplane = data_xplane.iloc[6000:9000]     # select data set
 print(data_xplane.head())              # preview data
-
-
 time_xplane = data_xplane["_totl,_time "]
 print(time_xplane.iloc[1])
 time_xplane = time_xplane - time_xplane.iloc[1]     # Subtract total sim time to start the time span at zero
-
 
 xplane_pitch = data_xplane["pitch,__deg "]  
 xplane_elevator_deflection = data_xplane["elev1,__deg .1"]
@@ -120,6 +145,8 @@ xplane_alt = data_xplane["p-alt,ftMSL "]
 xplane_U = data_xplane["Vtrue,_ktas "] * np.cos(np.deg2rad(xplane_alpha)) * 1.68781
 xplane_W = data_xplane["Vtrue,_ktas "] * np.sin(np.deg2rad(xplane_alpha)) * 1.68781
 xplane_Q = data_xplane["____Q,deg/s "] 
+
+
 
 
 # Comparison Plots
@@ -178,3 +205,5 @@ plt.show()
 
 
 
+
+# %%

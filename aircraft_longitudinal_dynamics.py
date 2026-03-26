@@ -1,5 +1,5 @@
 import numpy as np
-from standard_atmosphere_imperial import standard_atmosphere_imperial
+from standard_atmosphere import standard_atmosphere
 
 
 
@@ -20,7 +20,7 @@ def aircraft_longitudinal_dynamics(t,x, params):
     I_yy = params["I_yy"]                     # moment of inertia about pitch axis, [slug*ft^2]
     m = params["W"] / g                       # aircraft mass, [slugs]
 
-    rho, _, _ = standard_atmosphere_imperial(alt)   # air density calculatino
+    rho, _, _ = standard_atmosphere(alt)   # air density calculatino
     
     V = np.sqrt(U**2+W**2)                  #  resolved aircraft velocity
     qbar = 0.5 * rho * V**2 # dynamic pressure, [lb/ft^2]
