@@ -28,5 +28,3 @@ def ias2tas(ias, press_alt, T):
     V_tas = M * a
 
     return V_tas
-_, T, _ = standard_atmosphere(5000)
-print(ias2tas(100, 5000, T))

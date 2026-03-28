@@ -1,6 +1,6 @@
 import numpy as np
 from standard_atmosphere import standard_atmosphere
-
+import aero_model
 
 
 def aircraft_longitudinal_dynamics(t,x, params):
@@ -15,7 +15,6 @@ def aircraft_longitudinal_dynamics(t,x, params):
     AR = bw**2 / S
     delta_e = params["delta_e"]               # elevator deflection, [rad]
     thrust = params["thrust"]                 # total thrust in, [lb]
-    K = params["K"]
 
     I_yy = params["I_yy"]                     # moment of inertia about pitch axis, [slug*ft^2]
     m = params["W"] / g                       # aircraft mass, [slugs]
@@ -41,19 +40,12 @@ def aircraft_longitudinal_dynamics(t,x, params):
    ## Elevator Input Function
     delta_e = elevator_deflection(t, delta_e)
 
-
-    C_L = C_L_0 + C_L_alpha * alpha + C_L_delta_e * delta_e  # coefficient of lift
-    L = qbar * S * C_L # total lift
-
-    # Drag Calculations
-    C_D = C_D_0 + C_L**2 * K
-    D = qbar * S * C_D
+#%% Calculate forces and moments
+    C_L, C_D,_ , C_m = aero_model.aero_coefficients(alpha, delta_e, Q, V, params)
     
-    # Pitching Moment Calculation
-
-
-    C_m = C_m_0 + C_m_alpha * alpha + C_m_delta_e * delta_e + C_mq * ((Q*cbar)/(2*V)) # pitching moment coefficient
-    M = qbar * S * cbar * C_m   # pitching moment
+    L = qbar * S * C_L # total lift
+    D = qbar * S * C_D  # total drag
+    M = qbar * S * cbar * C_m   # total pitching moment
 
     
     X = -D * np.cos(alpha) + L * np.sin(alpha) + thrust # X forces
