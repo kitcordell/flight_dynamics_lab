@@ -1,5 +1,5 @@
 import numpy as np
-from ias2tas import ias2tas
+import conversions
 from standard_atmosphere import standard_atmosphere
 t0 = 0
 tf = 115
@@ -21,6 +21,10 @@ params = {
     "V_trim": 150,              # ft/s
     "gamma_trim": np.deg2rad(0.0),# rad
 
+    # Propulsion
+    "P_max_SL": 180.0,           # hp at sea level, convert to ft*lbf/s in thrust_model.py
+    "eta_p": 0.8,                # propeller efficiency
+
     # Lift coefficients
     "C_L_alpha": 5.143,           
     "C_L_0": 0.31,
@@ -39,5 +43,6 @@ params = {
 
 _, T, _ = standard_atmosphere(alt_0)
 params["AR"] = params["bw"]**2 / params["S"]
-params["V_ne"] = ias2tas(params["V_ne"], alt_0, T)
-params["V_S"] = ias2tas(params["V_S"], alt_0, T)
+params["V_ne"] = conversions.ias2tas(params["V_ne"], alt_0, T)
+params["V_S"] = conversions.ias2tas(params["V_S"], alt_0, T)
+params["P_max_SL"] = conversions.hp2ftlbfps(params["P_max_SL"])

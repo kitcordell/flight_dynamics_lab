@@ -9,6 +9,8 @@ from scipy.optimize import root
 from aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics
 from c172_params import alt_0
 
+#%% Longitudinal trim solver
+# ADD LATER: function of throttle_trim, gamma_trim, alt, and V_trim
 
 def aircraft_longitudinal_trim_solver(x, params):
     thrust, delta_e, theta = x
