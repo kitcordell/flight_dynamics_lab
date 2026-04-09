@@ -1,11 +1,4 @@
 import numpy as np
-from scipy.optimize import root
-from c172_params import params
-
-
-
-import numpy as np
-from scipy.optimize import root
 from aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics
 from c172_params import alt_0
 
@@ -13,7 +6,7 @@ from c172_params import alt_0
 # ADD LATER: function of throttle_trim, gamma_trim, alt, and V_trim
 
 def aircraft_longitudinal_trim_solver(x, params):
-    thrust, delta_e, theta = x
+    throttle, delta_e, theta = x
 
     V = params["V_trim"]          # fixed trim speed
     gamma_trim = params["gamma_trim"]
@@ -33,7 +26,7 @@ def aircraft_longitudinal_trim_solver(x, params):
 
     # Copy params and insert trim controls
     params_trim = params.copy()
-    params_trim["thrust"] = thrust
+    params_trim["throttle"] = throttle
     params_trim["delta_e"] = delta_e
 
     # Evaluate dynamics

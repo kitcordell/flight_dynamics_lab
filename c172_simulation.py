@@ -3,13 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from integrators import RK4
 from scipy.integrate import solve_ivp
-from scipy.optimize import root
+from scipy.optimize import least_squares
 import pandas as pd
 
 from aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics, elevator_deflection
 from drag_polar import drag_polar
 from elevator_trim_solver import aircraft_longitudinal_trim_solver
 from c172_params import params, t0, tf, dt, alt_0
+from thrust_model import thrust_piston_na
 
 
 
@@ -32,17 +33,22 @@ plt.xlabel("Velocity (ft/s)")
 
 # initial guess
 x0 = np.array([
-    300.0,               # thrust guess [lb]
+    0.6,                 # throttle guess [-]
     np.deg2rad(-2.0),    # delta_e guess [rad]
     np.deg2rad(3.0),     # theta guess [rad]
 ])
 
-sol = root(aircraft_longitudinal_trim_solver, x0, args=(params,), method="hybr")
-thrust_trim, delta_e_trim, theta_trim = sol.x
+sol = least_squares(
+    aircraft_longitudinal_trim_solver,
+    x0,
+    bounds=([0.0, -np.inf, -np.inf], [1.0, np.inf, np.inf]),
+    args=(params,),
+)
+throttle_trim, delta_e_trim, theta_trim = sol.x
 
 print("success:", sol.success)
 print("message:", sol.message)
-print("thrust trim [lb]:", thrust_trim)
+print("throttle trim [-]:", throttle_trim)
 print("delta_e trim [deg]:", np.rad2deg(delta_e_trim))
 print("theta trim [deg]:", np.rad2deg(theta_trim))
 print("trim residuals:", aircraft_longitudinal_trim_solver(sol.x, params))
@@ -59,8 +65,11 @@ Q_0 = 0.0
 
 x_trim = np.array([U_0, W_0, Q_0, theta_trim, alt_0])
 
-params["thrust"] = thrust_trim
+params["throttle"] = throttle_trim
 params["delta_e"] = delta_e_trim
+
+thrust_trim = thrust_piston_na(throttle_trim, V, alt_0, params)
+print("thrust trim [lb]:", thrust_trim)
 
 
 xdot_trim = aircraft_longitudinal_dynamics(0.0, x_trim, params)
@@ -149,7 +158,7 @@ xplane_Q = data_xplane["____Q,deg/s "]
 
 
 
-# Comparison Plots
+#%% Comparison Plots
 fig, axs = plt.subplots(7, 1, figsize=(9,10), sharex=True)
 
 axs[0].plot(t_rk4, x_rk4[:,0], color="red", linewidth=1)
