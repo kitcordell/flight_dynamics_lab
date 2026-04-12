@@ -8,7 +8,8 @@ def kts2fps (kts):
     return fps
 
 def fps2kts (fps):
-    fps = fps / 1.68781 # convert feet per second to knots
+    kts = fps / 1.68781 # convert feet per second to knots
+    return kts
 
 def hp2ftlbfps (hp):
     ftlbfps = hp * 550.0 # convert horsepower to foot-pounds per second

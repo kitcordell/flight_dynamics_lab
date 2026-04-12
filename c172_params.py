@@ -43,6 +43,6 @@ params = {
 
 _, T, _ = standard_atmosphere(alt_0)
 params["AR"] = params["bw"]**2 / params["S"]
-params["V_ne"] = conversions.ias2tas(params["V_ne"], alt_0, T)
-params["V_S"] = conversions.ias2tas(params["V_S"], alt_0, T)
+params["V_ne"] = conversions.ias2tas(conversions.kts2fps(params["V_ne"]), alt_0, T)
+params["V_S"] = conversions.ias2tas(conversions.kts2fps(params["V_S"]), alt_0, T)
 params["P_max_SL"] = conversions.hp2ftlbfps(params["P_max_SL"])

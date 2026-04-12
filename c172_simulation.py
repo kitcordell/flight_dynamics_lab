@@ -14,6 +14,7 @@ from c172_params import params, t0, tf, dt, alt_0
 from thrust_model import thrust_piston_na
 
 
+
 #%% Drag Polar Plots
 V, D, D_i, D_p = drag_polar(alt_0, params,)
 plt.plot(V[:], D[:], label = "Total Drag", linewidth=1)
@@ -46,7 +47,7 @@ x_trim, u_trim = longitudinal_trim(x0, trim_target)
 
 #%% Dynamics Calculations
     # Uses RK4 script for numerical integration and aircraft_longitudinal_dynamics EOM script
-t_rk4, x_rk4 = RK4(aircraft_longitudinal_dynamics, (0.0, tf), [x_trim], dt, args=(u_trim,params,))   # integrate equations of motion
+t_rk4, x_rk4 = RK4(aircraft_longitudinal_dynamics, (0.0, tf), x_trim, dt, args=(u_trim,params,))   # integrate equations of motion
 alpha = np.arctan2(x_rk4[:,1], x_rk4[:,0]) # angle of attack calculated from forward and vertical velocity, [rad]
 
 
@@ -68,7 +69,7 @@ roc_poh = pd.read_csv(         # read data
     skipinitialspace=True
 )
 
-print(roc_poh)
+print("\n", roc_poh)
 
 poh_roc_alt = roc_poh["press_alt_ft"]
 poh_roc_0C = roc_poh["fpm_0C"]
@@ -97,11 +98,8 @@ data_xplane = pd.read_csv(         # read data
     skipinitialspace=True
 )
 
-print(data_xplane.columns.tolist()) # print column names
 data_xplane = data_xplane.iloc[6000:9000]     # select data set
-print(data_xplane.head())              # preview data
 time_xplane = data_xplane["_totl,_time "]
-print(time_xplane.iloc[1])
 time_xplane = time_xplane - time_xplane.iloc[1]     # Subtract total sim time to start the time span at zero
 
 xplane_pitch = data_xplane["pitch,__deg "]  
