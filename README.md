@@ -102,3 +102,12 @@ This formulation makes it possible to simulate the aircraft response over time a
 
 ### Longitudinal State-Response Comparison
 <img src="figures/sim_vs_xplane.png" alt="State-Response" width="500">
+
+---
+
+## Functions
+**aircraft_longitudinal_dynamics(t,x, params)**
+- **t**: Timestep
+- **x**: States
+- **params**: Aircraft Parameters (bw, cbar, S, delta_e, throttle, m, I_yy)
+

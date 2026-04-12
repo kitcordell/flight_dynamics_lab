@@ -17,6 +17,3 @@ def standard_atmosphere(alt):
 
     return rho, T, p
 
-rho, T, p = standard_atmosphere(000) 
-
-print(rho, T, p)

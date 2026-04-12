@@ -3,11 +3,12 @@ from standard_atmosphere import standard_atmosphere
 import aero_model
 import thrust_model
 from constants import g
+import control_inputs
 
 
-def aircraft_longitudinal_dynamics(t,x, params):
-    U, W, Q, theta, alt = x
-    
+def aircraft_longitudinal_dynamics(t,x,u,params):
+    U, W, Q, theta, alt = x     # forward and vertical body axis velocities, pitch angle, altitude states
+    throttle, delta_e = u       # throttle and elevator deflection input states
 
 
 
@@ -15,25 +16,24 @@ def aircraft_longitudinal_dynamics(t,x, params):
     cbar = params["cbar"]                     # average chord, [ft]
     S = bw * cbar                             # wing surface area [ft^2]
     AR = bw**2 / S
-    delta_e = params["delta_e"]               # elevator deflection, [rad]
-    throttle = params["throttle"]                 # total thrust in, [lb]
+    # delta_e = params["delta_e"]               # elevator deflection, [rad]
+    # throttle = params["throttle"]                 # total thrust in, [lb]
     # throttle = 0.45
 
 
     I_yy = params["I_yy"]                     # moment of inertia about pitch axis, [slug*ft^2]
     m = params["W"] / g                       # aircraft mass, [slugs]
 
-    rho, _, _ = standard_atmosphere(alt)   # air density calculatino
-    
-    V = np.sqrt(U**2+W**2)                  #  resolved aircraft velocity
-    qbar = 0.5 * rho * V**2 # dynamic pressure, [lb/ft^2]
-    alpha = np.arctan2(W,U)
+    rho, _, _ = standard_atmosphere(alt)   # air density calculation
+
+#%% Calculate States in the freestream axis
+    V = np.sqrt(U**2+W**2)                  #  TAS relative to the freestream [ft/s]
+    qbar = 0.5 * rho * V**2                 # dynamic pressure, [lb/ft^2]
+    alpha = np.arctan2(W,U)                 # AOA
+
+#%% Aicraft Control Inputs
+    delta_e = control_inputs.elevator_deflection(t, delta_e)
     thrust = thrust_model.thrust_piston_na(throttle, V, alt, params)
-
-  
-   ## Elevator Input Function
-    delta_e = elevator_deflection(t, delta_e)
-
 #%% Calculate forces and moments
     C_L, C_D,_ , C_m = aero_model.aero_coefficients(alpha, delta_e, Q, V, params)
     

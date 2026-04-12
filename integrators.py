@@ -33,6 +33,10 @@ def RK2(f, tspan, y0, dt, args=()):
 
     return t, y
 
+## Runge Kutta 4
+    # f: function to integrate
+    # tspan: start and end time
+    # y0 : 
 def RK4(f, tspan, y0, dt, args=()):
     t0, tf = tspan
     y0 = np.asarray(y0, dtype=float)

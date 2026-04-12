@@ -5,16 +5,13 @@ from integrators import RK4
 from scipy.integrate import solve_ivp
 from scipy.optimize import least_squares
 import pandas as pd
+import conversions
 
 from aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics, elevator_deflection
 from drag_polar import drag_polar
-from elevator_trim_solver import aircraft_longitudinal_trim_solver
+from trim_solver import longitudinal_trim
 from c172_params import params, t0, tf, dt, alt_0
 from thrust_model import thrust_piston_na
-
-
-
-
 
 
 #%% Drag Polar Plots
@@ -28,76 +25,36 @@ plt.ylabel("Drag (lbf)")
 plt.xlabel("Velocity (ft/s)")
 
 
+#%% Solve for trim conditions
+# xdot_trim, theta_trim, U_0, W_0, Q_0 = trim_solver(0.45, -2.0, 3.0)  #  return x_trim, alpha_trim, U_0, W_0, Q_0
 
-#%% Trim Solver
+# Trim Conditions
+V_trim = conversions.kts2fps(90)
+gamma_trim = np.deg2rad(0.0)
+alt_trim = 4000
+trim_target = np.array([V_trim, gamma_trim, alt_trim])
 
-# initial guess
-x0 = np.array([
-    0.6,                 # throttle guess [-]
-    np.deg2rad(-2.0),    # delta_e guess [rad]
-    np.deg2rad(3.0),     # theta guess [rad]
-])
+# Guessed unknown states
+throttle_guess = 0.45
+delta_e_guess = np.deg2rad(-2.0)
+theta_guess = 0.0
+x0 = np.array([throttle_guess, delta_e_guess, theta_guess])
 
-sol = least_squares(
-    aircraft_longitudinal_trim_solver,
-    x0,
-    bounds=([0.0, -np.inf, -np.inf], [1.0, np.inf, np.inf]),
-    args=(params,),
-)
-throttle_trim, delta_e_trim, theta_trim = sol.x
-
-print("success:", sol.success)
-print("message:", sol.message)
-print("throttle trim [-]:", throttle_trim)
-print("delta_e trim [deg]:", np.rad2deg(delta_e_trim))
-print("theta trim [deg]:", np.rad2deg(theta_trim))
-print("trim residuals:", aircraft_longitudinal_trim_solver(sol.x, params))
-
-V = params["V_trim"]
-
-
-alpha_trim = theta_trim - params["gamma_trim"]
-
-U_0 = V * np.cos(alpha_trim)
-W_0 = V * np.sin(alpha_trim)
-Q_0 = 0.0
-
-
-x_trim = np.array([U_0, W_0, Q_0, theta_trim, alt_0])
-
-params["throttle"] = throttle_trim
-params["delta_e"] = delta_e_trim
-
-thrust_trim = thrust_piston_na(throttle_trim, V, alt_0, params)
-print("thrust trim [lb]:", thrust_trim)
-
-
-xdot_trim = aircraft_longitudinal_dynamics(0.0, x_trim, params)
-
-print("u_dot     =", xdot_trim[0])
-print("w_dot     =", xdot_trim[1])
-print("q_dot     =", xdot_trim[2])
-print("theta_dot =", xdot_trim[3])
-print("h_dot     =", xdot_trim[4])
-
-
-
-
+x_trim, u_trim = longitudinal_trim(x0, trim_target)
 
 
 
 #%% Dynamics Calculations
     # Uses RK4 script for numerical integration and aircraft_longitudinal_dynamics EOM script
-
-t_rk4, x_rk4 = RK4(aircraft_longitudinal_dynamics, (0.0, tf), [U_0, W_0, Q_0, theta_trim, alt_0], dt, args=(params,))
-
+t_rk4, x_rk4 = RK4(aircraft_longitudinal_dynamics, (0.0, tf), [x_trim], dt, args=(u_trim,params,))   # integrate equations of motion
 alpha = np.arctan2(x_rk4[:,1], x_rk4[:,0]) # angle of attack calculated from forward and vertical velocity, [rad]
 
 
 ## Log Elevator Deflection
+_, delta_e = u_trim
 elevator_deflection_history = np.zeros_like(t_rk4) # initialize elevator deflection array with same dimensions as time vector
 for i in range(len(t_rk4)):
-    elevator_deflection_history[i] = elevator_deflection(t_rk4[i], params["delta_e"]) # plugs in all values of "t" into the elevator function and stores then in an array
+    elevator_deflection_history[i] = elevator_deflection(t_rk4[i], delta_e) # plugs in all values of "t" into the elevator function and stores then in an array
 
 #%% Rate of Climb Plot
 
@@ -212,7 +169,3 @@ axs[6].grid(True)
 plt.tight_layout()
 plt.show()
 
-
-
-
-# %%
