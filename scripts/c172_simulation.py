@@ -12,7 +12,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from config.c172_params import params, t0, tf, dt, alt_0
+from aircraft.c172_params import params, t0, tf, dt, alt_0
 from models.aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics, elevator_deflection
 from models.drag_polar import drag_polar, power_required, power_curves, velocity_max
 from models.thrust_model import thrust_piston_na

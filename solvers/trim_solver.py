@@ -2,7 +2,7 @@
 #%%
 import numpy as np
 from scipy.optimize import least_squares
-from config.c172_params import params, alt_0
+from aircraft.c172_params import params, alt_0
 from models.aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics
 from utils.axis_transformations import body_to_velocity, velocity_to_body
 

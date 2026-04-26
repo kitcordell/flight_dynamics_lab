@@ -15,7 +15,7 @@ The project has one main track and a few side-study scripts:
 
 The core C172 workflow runs in this order:
 
-1. Aircraft and flight-condition parameters are defined in `c172_params.py`.
+1. Aircraft and flight-condition parameters are defined in `aircraft/c172_params.py`.
 2. Atmospheric properties are computed with `standard_atmosphere.py`.
 3. Aerodynamic coefficients are computed in `aero_model.py`.
 4. Longitudinal equations of motion are evaluated in `aircraft_longitudinal_dynamics.py`.
@@ -37,7 +37,7 @@ The core C172 workflow runs in this order:
 
 ### Aircraft Definition
 
-- `config/c172_params.py`
+- `aircraft/c172_params.py`
   - Central parameter dictionary for the aircraft.
   - Stores geometry, inertia, weight, trim speed, and aerodynamic coefficients.
   - Converts some values into simulation-ready units.
@@ -160,7 +160,7 @@ These files look useful, but they do not appear to be part of the main C172 nonl
 If you want to understand the repo quickly, read the files in this order:
 
 1. `README.md`
-2. `config/c172_params.py`
+2. `aircraft/c172_params.py`
 3. `models/aero_model.py`
 4. `models/aircraft_longitudinal_dynamics.py`
 5. `solvers/trim_solver.py`
