@@ -16,6 +16,8 @@ This project is part of a broader effort to better understand aircraft dynamics,
 
 - Comparison to X-Plane / G-1000 style data for testing validation techniques
 
+See `docs/PROJECT_STRUCTURE.md` for a map of the repository layout and main simulation workflow. Run the main simulation with `python scripts/c172_simulation.py`.
+
 
 ## Dynamics Model
 
