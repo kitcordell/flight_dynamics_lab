@@ -157,37 +157,37 @@ def climb_trim_at_speed(x0, trim_target):
 
 #%% 
 # Example: Level Flight
-import conversions
-from c172_params import params
+# import conversions
+# from c172_params import params
 
-# Trim Conditions
-V_trim = conversions.kts2fps(90)
-gamma_trim = np.deg2rad(0.0)
-alt_trim = 4000
-trim_target = np.array([V_trim, gamma_trim, alt_trim])
+# # Trim Conditions
+# V_trim = conversions.kts2fps(90)
+# gamma_trim = np.deg2rad(0.0)
+# alt_trim = 4000
+# trim_target = np.array([V_trim, gamma_trim, alt_trim])
 
-# Guessed unknown states
-throttle_guess = 0.45
-delta_e_guess = np.deg2rad(-2.0)
-theta_guess = 0.0
-x0 = np.array([throttle_guess, delta_e_guess, theta_guess])
+# # Guessed unknown states
+# throttle_guess = 0.45
+# delta_e_guess = np.deg2rad(-2.0)
+# theta_guess = 0.0
+# x0 = np.array([throttle_guess, delta_e_guess, theta_guess])
 
-sol = longitudinal_trim(x0, trim_target)
+# sol = longitudinal_trim(x0, trim_target)
 
 
 #%% 
-# Example: ROC max
+# # Example: ROC max
 
-V_array = np.linspace(80, 180, 30)   # ft/s, example only
-throttle = 1.0
-alt = 4000.0
+# V_array = np.linspace(80, 180, 30)   # ft/s, example only
+# throttle = 1.0
+# alt = 4000.0
 
-# initial guess = [theta, delta_e, gamma]
-x0 = np.array([
-    np.deg2rad(5.0),
-    np.deg2rad(-2.0),
-    np.deg2rad(3.0)
-])
+# # initial guess = [theta, delta_e, gamma]
+# x0 = np.array([
+#     np.deg2rad(5.0),
+#     np.deg2rad(-2.0),
+#     np.deg2rad(3.0)
+# ])
 
-trim_target = [1, 90, 4000]
-climb_trim_at_speed(x0, trim_target)
+# trim_target = [1, 90, 4000]
+# climb_trim_at_speed(x0, trim_target)

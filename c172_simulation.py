@@ -5,7 +5,7 @@ from integrators import RK4
 from scipy.integrate import solve_ivp
 from scipy.optimize import least_squares
 import pandas as pd
-import conversions
+import conversions as conv
 
 from aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics, elevator_deflection
 from drag_polar import drag_polar, power_required, power_curves, velocity_max
@@ -16,33 +16,41 @@ from thrust_model import thrust_piston_na
 
 
 #%% Drag Polar Plots
-# V, D, D_i, D_p = drag_polar(alt_0, params,)
-# plt.plot(V[:], D[:], label = "Total Drag", linewidth=1)
-# plt.plot(V, D_i[:], label = "Induced Drag", linewidth=1)
-# plt.plot(V,D_p[:], label = "Parasite Drag", linewidth=1)
-# plt.legend()
-# plt.title("Drag Polar Curve, C172")
-# plt.ylabel("Drag (lbf)")
-# plt.xlabel("Velocity (ft/s)")
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 
+# Drag Polar
+V, D, D_i, D_p = drag_polar(alt_0, params)
+ax1.plot(V, D, label="Total Drag", linewidth=1)
+ax1.plot(V, D_i, label="Induced Drag", linewidth=1)
+ax1.plot(V, D_p, label="Parasite Drag", linewidth=1)
+ax1.set_xlabel("Velocity (ft/s)")
+ax1.set_ylabel("Drag (lbf)")
+ax1.set_title("Drag Polar - C172")
+ax1.legend()
+ax1.grid()
+
+# Power Curves
 V, P_req, P_i, P_p, P_A = power_curves(4000, 1.0, params)
+ax2.plot(V, P_req, label="Power Required", linewidth=1)
+ax2.plot(V, P_A, label="Power Available", linewidth=1)
+ax2.set_xlabel("Velocity (ft/s)")
+ax2.set_ylabel("Power (lb·ft/s)")
+ax2.set_title("Power Curves - C172")
+ax2.legend()
+ax2.grid()
 
-plt.plot(V, P_req, label="Power Required")
-plt.plot(V, P_A, label="Power Available")
-plt.xlabel("Velocity (ft/s)")
-plt.ylabel("Power (lb*ft/s)")
-plt.legend()
-plt.grid()
-plt.show()
+plt.tight_layout()
 
 
-ans = velocity_max(1000, 1, params, 300)
-print(ans.x)
+V_max = velocity_max(1000, 0.75, params, 300)
+print(f"Max Velocity: {V_max:.2f} ft/s | {conv.fps2kts(V_max):.2f} kts")
+
+
 #%% Solve for trim conditions
 # xdot_trim, theta_trim, U_0, W_0, Q_0 = trim_solver(0.45, -2.0, 3.0)  #  return x_trim, alpha_trim, U_0, W_0, Q_0
 
 # Trim Conditions
-V_trim = conversions.kts2fps(90)
+V_trim = conv.kts2fps(90)
 gamma_trim = np.deg2rad(0.0)
 alt_trim = 4000
 trim_target = np.array([V_trim, gamma_trim, alt_trim])

@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from standard_atmosphere import standard_atmosphere
 from thrust_model import power_available
 from scipy.optimize import least_squares
+from aero_model import drag_coefficient
 # Drag Polar Function
 
 # Assumptions:
@@ -69,15 +70,18 @@ def power_curves(alt, throttle, params):
 
 
 def velocity_max(alt, throttle, params, x0):
+    rho, _, _ = standard_atmosphere(alt)
+    P_A = power_available(throttle, alt, params)
 
     def residual(V):
-        _, P_req, _, _ = power_required(alt, params)
-        P_A = power_available(1 ,alt, params)
+        q = 0.5 * rho * V[0]**2
+        C_L = params["W"] / (q * params["S"])
+        C_D, _ = drag_coefficient(C_L, params)
+        P_req = q * params["S"] * C_D * V[0]
+        return [P_req - P_A]
 
-        residual = P_req - P_A
-        return residual
-    
-    sol = least_squares(residual,x0)
-    return sol
+    sol = least_squares(residual, x0)
+    return sol.x[0]
 
 from c172_params import params
+
