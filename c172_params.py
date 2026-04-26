@@ -35,7 +35,7 @@ params = {
     "C_D_u": 0.0,
 
     # Pitching moment coefficients
-    "C_m_0": -0.015,
+    "C_m_0": 0.035,
     "C_m_alpha": -0.89,
     "C_m_delta_e": -1.28,
     "C_mq": -12.4,

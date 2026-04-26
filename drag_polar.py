@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from standard_atmosphere import standard_atmosphere
+from thrust_model import power_available
+from scipy.optimize import least_squares
 # Drag Polar Function
 
 # Assumptions:
@@ -44,5 +46,38 @@ def drag_polar(alt_0, params,):
     return V, D, D_i, D_p
 
 
+def power_required(alt_0, params):
+    V, D, D_i, D_p = drag_polar(alt_0, params)
+
+    P_req = D * V
+    P_i = D_i * V
+    P_p = D_p * V
+
+    return V, P_req, P_i, P_p
 
 
+
+def power_curves(alt, throttle, params):
+    V, P_req, P_i, P_p = power_required(alt, params)
+
+    P_A = power_available(throttle, alt, params)
+
+    # Make it same shape as V for plotting
+    P_A_curve = np.full_like(V, P_A)
+
+    return V, P_req, P_i, P_p, P_A_curve
+
+
+def velocity_max(alt, throttle, params, x0):
+
+    def residual(V):
+        _, P_req, _, _ = power_required(alt, params)
+        P_A = power_available(1 ,alt, params)
+
+        residual = P_req - P_A
+        return residual
+    
+    sol = least_squares(residual,x0)
+    return sol
+
+from c172_params import params

@@ -27,3 +27,17 @@ def thrust_piston_na(throttle, V, alt, params):
     
 
     return T
+
+
+def power_available(throttle, alt, params):
+    if throttle < 0.0 or throttle > 1.0:
+        raise ValueError("Throttle must be between 0 and 1")
+
+    P_max_SL = params["P_max_SL"]
+    eta_p = params["eta_p"]
+
+    rho, _, _ = standard_atmosphere(alt)
+
+    P_A = eta_p * P_max_SL * throttle * rho / rho_0
+
+    return P_A

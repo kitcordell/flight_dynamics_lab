@@ -8,7 +8,7 @@ import pandas as pd
 import conversions
 
 from aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics, elevator_deflection
-from drag_polar import drag_polar
+from drag_polar import drag_polar, power_required, power_curves, velocity_max
 from trim_solver import longitudinal_trim
 from c172_params import params, t0, tf, dt, alt_0
 from thrust_model import thrust_piston_na
@@ -16,16 +16,28 @@ from thrust_model import thrust_piston_na
 
 
 #%% Drag Polar Plots
-V, D, D_i, D_p = drag_polar(alt_0, params,)
-plt.plot(V[:], D[:], label = "Total Drag", linewidth=1)
-plt.plot(V, D_i[:], label = "Induced Drag", linewidth=1)
-plt.plot(V,D_p[:], label = "Parasite Drag", linewidth=1)
-plt.legend()
-plt.title("Drag Polar Curve, C172")
-plt.ylabel("Drag (lbf)")
+# V, D, D_i, D_p = drag_polar(alt_0, params,)
+# plt.plot(V[:], D[:], label = "Total Drag", linewidth=1)
+# plt.plot(V, D_i[:], label = "Induced Drag", linewidth=1)
+# plt.plot(V,D_p[:], label = "Parasite Drag", linewidth=1)
+# plt.legend()
+# plt.title("Drag Polar Curve, C172")
+# plt.ylabel("Drag (lbf)")
+# plt.xlabel("Velocity (ft/s)")
+
+V, P_req, P_i, P_p, P_A = power_curves(4000, 1.0, params)
+
+plt.plot(V, P_req, label="Power Required")
+plt.plot(V, P_A, label="Power Available")
 plt.xlabel("Velocity (ft/s)")
+plt.ylabel("Power (lb*ft/s)")
+plt.legend()
+plt.grid()
+plt.show()
 
 
+ans = velocity_max(1000, 1, params, 300)
+print(ans.x)
 #%% Solve for trim conditions
 # xdot_trim, theta_trim, U_0, W_0, Q_0 = trim_solver(0.45, -2.0, 3.0)  #  return x_trim, alpha_trim, U_0, W_0, Q_0
 

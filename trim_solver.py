@@ -133,7 +133,7 @@ def climb_trim_at_speed(x0, trim_target):
     ROC_fpm = ROC_fps * 60.0
 
     print("\nTrim Target:")
-    print("Throttle:", throttle_trim, "[-]")
+    print("Throttle:", throttle_trim * 100, "[%]")
     print("Velocity:", V_trim, "[ft/s]")
     print("Altitude:", alt_trim, "[ft]")
 
@@ -176,18 +176,18 @@ sol = longitudinal_trim(x0, trim_target)
 
 
 #%% 
-# # Example: ROC max
+# Example: ROC max
 
-# V_array = np.linspace(80, 180, 30)   # ft/s, example only
-# throttle = 1.0
-# alt = 4000.0
+V_array = np.linspace(80, 180, 30)   # ft/s, example only
+throttle = 1.0
+alt = 4000.0
 
-# # initial guess = [theta, delta_e, gamma]
-# x0 = np.array([
-#     np.deg2rad(5.0),
-#     np.deg2rad(-2.0),
-#     np.deg2rad(3.0)
-# ])
+# initial guess = [theta, delta_e, gamma]
+x0 = np.array([
+    np.deg2rad(5.0),
+    np.deg2rad(-2.0),
+    np.deg2rad(3.0)
+])
 
-# trim_target = [1, 80, 4000]
-# climb_trim_at_speed(x0, trim_target)
+trim_target = [1, 90, 4000]
+climb_trim_at_speed(x0, trim_target)
