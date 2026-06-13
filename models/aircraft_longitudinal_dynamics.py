@@ -13,7 +13,7 @@ def aircraft_longitudinal_dynamics(t,x,u,params):
 
     bw = params["bw"]                         # wing span, [ft]
     cbar = params["cbar"]                     # average chord, [ft]
-    S = bw * cbar                             # wing surface area [ft^2]
+    S = params["S"]                           # wing surface area [ft^2]
     AR = bw**2 / S
     # delta_e = params["delta_e"]               # elevator deflection, [rad]
     # throttle = params["throttle"]                 # total thrust in, [lb]
@@ -57,15 +57,3 @@ def aircraft_longitudinal_dynamics(t,x,u,params):
     
 
     return xdot
-
-
-#%% Elevator Deflection Function
-def elevator_deflection(t, delta_e):
-    if t > 5.6 and t < 6.6:
-        delta_e = delta_e + np.deg2rad(-2.164)
-
-    else:
-
-        delta_e = delta_e
-
-    return delta_e

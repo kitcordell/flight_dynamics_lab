@@ -11,7 +11,8 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from aircraft.c172_params import params, tf, dt, alt_0
-from models.aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics, elevator_deflection
+from config.control_inputs import elevator_deflection
+from models.aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics
 from models.drag_polar import drag_polar, power_curves, velocity_max
 from solvers.trim_solver import longitudinal_trim, max_ROC
 from utils import conversions as conv
