@@ -10,14 +10,14 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from aircraft.c172_params import params, tf, dt, alt_0
-from config.control_inputs import elevator_deflection
-from models.aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics
-from mechanics.drag_polar import drag_polar, power_curves, velocity_max
-from solvers.trim_solver import longitudinal_trim, max_ROC
-from utils import conversions as conv
-from utils.integrators import RK4
-from utils.plot_theme import AERO_COLORS, set_aerospace_theme, style_axes
+from flight_dynamics.c172_params import params, tf, dt, alt_0
+from flight_dynamics.control_inputs import elevator_deflection
+from flight_dynamics.longitudinal_dynamics import aircraft_longitudinal_dynamics
+from flight_dynamics.drag_polar import drag_polar, power_curves, velocity_max
+from flight_dynamics.trim_solver import longitudinal_trim, max_ROC
+from flight_dynamics import conversions as conv
+from flight_dynamics.integrators import RK4
+from flight_dynamics.plot_theme import AERO_COLORS, set_aerospace_theme, style_axes
 
 DATA_DIR = ROOT_DIR / "data"
 

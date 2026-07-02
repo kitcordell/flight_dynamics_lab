@@ -10,7 +10,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from utils.integrators import euler, RK2
+from flight_dynamics.integrators import euler, RK2
 
 a = np.array([[1,2],[5,5]])
 

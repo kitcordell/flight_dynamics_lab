@@ -9,7 +9,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from utils.integrators import euler, RK2, RK4
+from flight_dynamics.integrators import euler, RK2, RK4
 
 L = 1.0 # Pendulum Length, m
 g = 9.8 # Gravity, m/s^2

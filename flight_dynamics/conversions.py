@@ -1,7 +1,7 @@
 import numpy as np
-from config import constants
-from utils.standard_atmosphere import standard_atmosphere
-from utils.speed_of_sound import speed_of_sound
+from flight_dynamics import constants
+from flight_dynamics.atmosphere import standard_atmosphere
+from flight_dynamics.speed_of_sound import speed_of_sound
 
 def kts2fps (kts):
     fps = kts * 1.68781 # convert knots to feet per second

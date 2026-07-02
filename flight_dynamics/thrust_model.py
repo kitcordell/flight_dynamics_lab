@@ -1,6 +1,6 @@
 import numpy as np
-from config.constants import rho_0
-from utils.standard_atmosphere import standard_atmosphere
+from flight_dynamics.constants import rho_0
+from flight_dynamics.atmosphere import standard_atmosphere
 
 #%% Naturally aspirated piston engine thrust approximation
     # Inputs:
@@ -21,10 +21,6 @@ def thrust_piston_na(throttle, V, alt, params):
         
         P_A = eta_p * P_max_SL * throttle * rho / rho_0 # available power at altitude [lb*ft/s]
         T = P_A / V
-
-
-
-    
 
     return T
 

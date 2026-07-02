@@ -2,11 +2,11 @@
 #%%
 import numpy as np
 from scipy.optimize import least_squares
-from aircraft.c172_params import params
-from models.aircraft_longitudinal_dynamics import aircraft_longitudinal_dynamics
-from utils.axis_transformations import body_to_velocity, velocity_to_body
-from utils import conversions
-from utils.standard_atmosphere import standard_atmosphere
+from flight_dynamics.c172_params import params
+from flight_dynamics.longitudinal_dynamics import aircraft_longitudinal_dynamics
+from flight_dynamics.axis_transformations import body_to_velocity, velocity_to_body
+from flight_dynamics import conversions
+from flight_dynamics.atmosphere import standard_atmosphere
 
 
 #%%

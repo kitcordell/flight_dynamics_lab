@@ -10,11 +10,11 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from aircraft.c172_params import params
-from mechanics.rate_of_climb_solver import max_roc_vs_altitude, roc_speed_sweep
-from solvers.trim_solver import max_ROC
-from utils import conversions as conv
-from utils.plot_theme import AERO_COLORS, set_aerospace_theme, style_axes
+from flight_dynamics.c172_params import params
+from flight_dynamics.rate_of_climb_solver import max_roc_vs_altitude, roc_speed_sweep
+from flight_dynamics.trim_solver import max_ROC
+from flight_dynamics import conversions as conv
+from flight_dynamics.plot_theme import AERO_COLORS, set_aerospace_theme, style_axes
 
 DATA_DIR = ROOT_DIR / "data"
 

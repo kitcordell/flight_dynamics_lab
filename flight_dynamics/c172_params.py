@@ -1,5 +1,5 @@
 import numpy as np
-from utils import conversions
+from flight_dynamics import conversions
 t0 = 0
 tf = 115
 dt = 0.01

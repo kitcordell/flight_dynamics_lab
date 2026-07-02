@@ -1,5 +1,5 @@
 import numpy as np
-from aero_model import drag_coefficient
+from flight_dynamics.aero_model import drag_coefficient
 
 ## Power Required 
 

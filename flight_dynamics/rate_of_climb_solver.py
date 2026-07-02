@@ -1,15 +1,8 @@
-from pathlib import Path
-import sys
-
 import numpy as np
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
-if str(ROOT_DIR) not in sys.path:
-    sys.path.insert(0, str(ROOT_DIR))
-
-from mechanics.drag_polar import power_required
-from models.thrust_model import power_available
-from utils import conversions
+from flight_dynamics.drag_polar import power_required
+from flight_dynamics.thrust_model import power_available
+from flight_dynamics import conversions
 
 
 def rate_of_climb_excess_power(V, alt, throttle, params):
@@ -90,7 +83,7 @@ def max_roc_vs_altitude(altitudes, throttle, params):
 
 
 if __name__ == "__main__":
-    from aircraft.c172_params import params
+    from flight_dynamics.c172_params import params
 
     altitude = 4000.0
     throttle = 1.0

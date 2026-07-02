@@ -1,10 +1,13 @@
 import numpy as np
-from config import control_inputs
-from config.constants import g
-from models import aero_model, thrust_model
-from utils.standard_atmosphere import standard_atmosphere
+from flight_dynamics import aero_model, control_inputs, thrust_model
+from flight_dynamics.atmosphere import standard_atmosphere
+from flight_dynamics.constants import g
 
-
+# Calculates derivatives of the equations of motion
+# t: timespan array
+# x: aircraft state
+# u: control input
+# params: aircraft parameters
 def aircraft_longitudinal_dynamics(t,x,u,params):
     U, W, Q, theta, alt = x     # forward and vertical body axis velocities, pitch angle, altitude states
     throttle, delta_e = u       # throttle and elevator deflection input states

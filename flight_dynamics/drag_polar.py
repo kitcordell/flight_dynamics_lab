@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import least_squares
-from models.aero_model import drag_coefficient
-from models.thrust_model import power_available
-from utils import conversions
-from utils.standard_atmosphere import standard_atmosphere
+from flight_dynamics.aero_model import drag_coefficient
+from flight_dynamics.thrust_model import power_available
+from flight_dynamics import conversions
+from flight_dynamics.atmosphere import standard_atmosphere
 # Drag Polar Function
 
 # Assumptions:

@@ -1,5 +1,5 @@
 # Computes air density, temperature and pressure as a function of altitude with standard atmosphere conditions
-from config import constants
+from flight_dynamics import constants
 
 def standard_atmosphere(alt):
     

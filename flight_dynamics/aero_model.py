@@ -1,11 +1,5 @@
 import numpy as np
-
-def aero_coefficients(alpha, delta_e, Q, V, params):
-    C_L = lift_coefficient(alpha, delta_e, params)
-    C_D, C_D_i = drag_coefficient(C_L, params)
-    C_m = moment_coefficient(alpha, delta_e, Q, V, params)
-    return C_L, C_D, C_D_i, C_m
-
+from flight_dynamics import atmosphere
 
 
 def lift_coefficient(alpha, delta_e, params):
@@ -38,3 +32,41 @@ def moment_coefficient(alpha, delta_e, Q, V, params):
 
     C_m = C_m_0 + C_m_alpha * alpha + C_m_delta_e * delta_e + C_mq * ((Q * cbar) / (2 * V))
     return C_m
+
+def aero_coefficients(alpha, delta_e, Q, V, params):
+    C_L = lift_coefficient(alpha, delta_e, params)
+    C_D, C_D_i = drag_coefficient(C_L, params)
+    C_m = moment_coefficient(alpha, delta_e, Q, V, params)
+    return C_L, C_D, C_D_i, C_m
+
+def aero_loads(qbar, params, C_L, C_D, C_m):
+
+
+    S = params["S"]
+    cbar = params["cbar"]
+
+    L = qbar * S * C_L
+    D = qbar * S * C_D
+    M = qbar * S * cbar * C_m
+
+    return L, D, M
+
+def air_data_from_state(x, params):
+    U, W, Q, theta, alt = x
+
+    rho = params["atmosphere"](alt)
+    V = np.sqrt(U**2 + W**2)
+    alpha = np.arctan2(W, U)
+    qbar = 0.5 * rho * V**2
+
+    return {
+        "U": U,
+        "W": W,
+        "Q": Q,
+        "theta": theta,
+        "alt": alt,
+        "rho": rho,
+        "V": V,
+        "alpha": alpha,
+        "qbar": qbar,
+    }
