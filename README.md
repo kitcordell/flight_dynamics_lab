@@ -1,25 +1,62 @@
 # Flight Dynamics Lab
 
-
-
 This project is part of a broader effort to better understand aircraft dynamics, performance, and model validation by turning flight dynamics theory into working simulation tools.
+
+The main goal is to take the equations from flight dynamics and use them to answer practical questions: Can the aircraft be trimmed at this condition? How fast can it climb? What happens after a control input or disturbance?
 
 ## Current Features
 
 - Nonlinear longitudinal dynamics model
-
-- Trim solver for steady-state flight conditions
-
+- Nonlinear lateral-directional dynamics model
+- Full nonlinear six-degree-of-freedom dynamics model
+- Longitudinal, lateral-directional, and six-DOF trim solvers
+- Maximum airspeed and rate-of-climb calculations
+- Dynamics-trim and excess-power climb methods
 - Visualization in Matplotlib
-
 - Custom Euler, RK2, and RK4 integrators
+- Comparison to POH and X-Plane / G-1000 style data for testing validation techniques
+- Automated pytest validation for trim, control directions, and six-DOF integration
 
-- Comparison to X-Plane / G-1000 style data for testing validation techniques
+See `docs/PROJECT_STRUCTURE.md` for the repository layout and
+`docs/CONVENTIONS.md` for axes, signs, units, trim scaling, and parameter status.
 
-See `docs/PROJECT_STRUCTURE.md` for a map of the repository layout and main simulation workflow. Run the main simulation with `python scripts/c172_simulation.py`.
+## Running the Project
 
+Install the required Python packages with:
 
-## Dynamics Model
+```powershell
+pip install -r requirements.txt
+```
+
+The main C172 analysis combines performance calculations, longitudinal trim, nonlinear simulation, and comparison plots:
+
+```powershell
+python scripts/c172_simulation.py
+```
+
+The six-DOF example solves a full trim condition, adds a small bank-angle disturbance, and integrates the 12-state aircraft response:
+
+```powershell
+python scripts/c172_six_dof_simulation.py
+```
+
+Run the automated validation suite with:
+
+```powershell
+python -m pytest -q
+```
+
+## Dynamics Models
+
+There are three related nonlinear models in the project:
+
+1. The longitudinal model describes forward, vertical, and pitching motion.
+2. The lateral-directional model describes side velocity, roll, and yaw about a supplied longitudinal trim condition.
+3. The six-DOF model combines the longitudinal and lateral-directional motion into one 12-state rigid-body simulation.
+
+The detailed equations below describe the longitudinal model, which is still the simplest place to understand how the aircraft model is constructed.
+
+## Longitudinal Dynamics Model
 
 The longitudinal state vector is:
 
@@ -107,9 +144,38 @@ This formulation makes it possible to simulate the aircraft response over time a
 
 ---
 
-## Functions
-**aircraft_longitudinal_dynamics(t,x, params)**
-- **t**: Timestep
-- **x**: States
-- **params**: Aircraft Parameters (bw, cbar, S, delta_e, throttle, m, I_yy)
+## Main Functions
+
+**`aircraft_longitudinal_dynamics(t, x, u, params, control_input=...)`**
+
+- **t**: Current simulation time
+- **x**: Longitudinal state vector $[U, W, Q, \theta, h]$
+- **u**: Input vector `[throttle, elevator]`
+- **params**: Aircraft geometry, mass properties, and aerodynamic coefficients
+- **control_input**: Selected elevator input function
+
+**`aircraft_six_dof_dynamics(t, x, u, params, ...)`**
+
+- **x**: Full state vector $[U, V, W, P, Q, R, \phi, \theta, \psi, north, east, h]$
+- **u**: Input vector `[throttle, elevator, aileron, rudder]`
+
+The trim solvers accept aircraft parameters explicitly and return
+`(trim_state, trim_control, scipy_result)`:
+
+```python
+longitudinal_trim(x0, trim_target, aircraft_params, verbose=True)
+lateral_trim(x0, longitudinal_state, trim_target, aircraft_params, verbose=True)
+six_dof_trim(x0, trim_target, aircraft_params, verbose=True)
+```
+
+The SciPy result includes raw and scaled residuals, residual norms, bound-proximity
+information, and a `trim_valid` flag. Invalid high-residual solutions raise
+`TrimConvergenceError`.
+
+The main performance solvers are:
+
+```python
+airspeed_max(...)
+max_ROC(...)
+```
 

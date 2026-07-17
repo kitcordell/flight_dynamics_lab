@@ -78,6 +78,8 @@ The current C172 longitudinal simulation workflow runs through these modules:
   - Longitudinal, lateral-directional, and full six-DOF straight-flight trim solvers.
   - The lateral solver trims side velocity, bank angle, aileron, and rudder.
   - Solves the six-DOF control inputs, aerodynamic angles, bank angle, and pitch angle.
+  - Applies aircraft control limits, scaled residuals, convergence validation, and
+    bound-proximity diagnostics.
 
 - `flight_dynamics/mechanics.py`
   - Drag-polar, power-required, power-available, and single-altitude maximum-speed helpers.
@@ -128,6 +130,16 @@ The `examples/` folder holds exploratory or classroom-style scripts that are not
 
 - `notebooks/`
   - Notebook versions or supporting notebook assets.
+
+- `tests/`
+  - Pytest validation for trim convergence, physical bounds, raw residuals,
+    control-direction signs, and finite six-DOF integration.
+
+## Conventions and Validation Status
+
+`docs/CONVENTIONS.md` documents the body and Earth axes, angular-rate and control
+signs, coefficient conventions, units, trim scaling, and the provisional status of
+the current C172 lateral derivatives and inertia values.
 
 ## Suggested Reading Order
 

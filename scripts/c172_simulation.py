@@ -166,7 +166,11 @@ trim_initial_guess = np.array([
     theta_guess,
 ])
 
-x_trim, u_trim = longitudinal_trim(trim_initial_guess, trim_target)
+x_trim, u_trim, trim_solution = longitudinal_trim(
+    trim_initial_guess,
+    trim_target,
+    params,
+)
 
 #%% Dynamics Calculations
 # Uses RK4 integration with the nonlinear longitudinal equations of motion

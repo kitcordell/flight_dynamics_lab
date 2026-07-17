@@ -13,6 +13,8 @@ params = {
     "e": 0.7,
 
     # Aircraft moments of inertia
+    # PROVISIONAL / UNVERIFIED: no primary source is recorded in this repository.
+    # These values require comparison with a documented C172 mass-properties source.
     "I_xx": 948.0,                # roll moment of inertia, [slug*ft^2]
     "I_yy": 1346.0,               # pitch moment of inertia, [slug*ft^2]
     "I_zz": 1967.0,               # yaw moment of inertia, [slug*ft^2]
@@ -22,6 +24,15 @@ params = {
     "V_S": 45.0,          # stall speed in indicated knots
     "V_ne": 170.0,        # never exceed speed in indicated knots
     "gamma_trim": np.deg2rad(0.0),# rad
+
+    # Control-surface travel used as physical bounds by the trim solvers, [rad]
+    # Elevator limits preserve the values already used in control_inputs.py.
+    # Aileron and rudder limits are provisional because no source is recorded here.
+    "control_limits": {
+        "elevator": (np.deg2rad(-23.0), np.deg2rad(28.0)),
+        "aileron": (np.deg2rad(-20.0), np.deg2rad(20.0)),
+        "rudder": (np.deg2rad(-16.0), np.deg2rad(16.0)),
+    },
 
     # Propulsion
     "P_max_SL": 180.0,           # hp at sea level, convert to ft*lbf/s in thrust_model.py
@@ -41,6 +52,10 @@ params = {
     "C_m_alpha": -0.89,
     "C_m_delta_e": -1.28,
     "C_mq": -12.4,
+
+    # Lateral-directional aerodynamic derivatives
+    # PROVISIONAL / UNVERIFIED: no primary source is recorded in this repository.
+    # Sign conventions are documented in docs/CONVENTIONS.md.
 
     # Side-force coefficients
     "C_Y_0": 0.0,                 # side force at zero sideslip
