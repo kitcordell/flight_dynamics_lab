@@ -413,7 +413,7 @@ def plot_six_dof_response(
     )
 
     # Arrange related states into velocity, rate, attitude, and position rows
-    fig, axes = plt.subplots(4, 3, figsize=(13, 11), sharex=True)
+    fig, axes = plt.subplots(4, 3, figsize=(9, 10), sharex=True)
     fig.suptitle(
         _title(aircraft_name, "Six-DOF State Response"),
         fontsize=13,

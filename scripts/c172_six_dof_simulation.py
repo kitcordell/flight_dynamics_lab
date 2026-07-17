@@ -55,8 +55,8 @@ six_dof_trim_state, six_dof_control, six_dof_trim_solution = six_dof_trim(
 six_dof_initial_state = six_dof_trim_state.copy()
 
 # Start with a small bank-angle perturbation so the lateral response is visible
-initial_bank_angle_rad = np.deg2rad(5.0)
-six_dof_initial_state[6] += initial_bank_angle_rad
+# initial_bank_angle_rad = np.deg2rad(5.0)
+# six_dof_initial_state[6] += initial_bank_angle_rad
 
 
 #%% Integrate the six-DOF equations of motion

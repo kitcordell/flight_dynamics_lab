@@ -7,8 +7,8 @@ The main goal is to take the equations from flight dynamics and use them to answ
 ## Current Features
 
 - Nonlinear longitudinal dynamics model
-- Nonlinear lateral-directional dynamics model
-- Full nonlinear six-degree-of-freedom dynamics model
+- Reduced nonlinear lateral-directional model about a supplied longitudinal trim condition
+- Full nonlinear 12-state rigid-body dynamics with a simplified coefficient-based aerodynamic model using linear aerodynamic derivatives
 - Longitudinal, lateral-directional, and six-DOF trim solvers
 - Maximum airspeed and rate-of-climb calculations
 - Dynamics-trim and excess-power climb methods
@@ -20,39 +20,14 @@ The main goal is to take the equations from flight dynamics and use them to answ
 See `docs/PROJECT_STRUCTURE.md` for the repository layout and
 `docs/CONVENTIONS.md` for axes, signs, units, trim validation, and parameter status.
 
-## Running the Project
-
-Install the required Python packages with:
-
-```powershell
-pip install -r requirements.txt
-```
-
-The main C172 analysis combines performance calculations, longitudinal trim, nonlinear simulation, and comparison plots:
-
-```powershell
-python scripts/c172_simulation.py
-```
-
-The six-DOF example solves a full trim condition, adds a small bank-angle disturbance, and integrates the 12-state aircraft response:
-
-```powershell
-python scripts/c172_six_dof_simulation.py
-```
-
-Run the automated validation suite with:
-
-```powershell
-python -m pytest -q
-```
 
 ## Dynamics Models
 
 There are three related nonlinear models in the project:
 
 1. The longitudinal model describes forward, vertical, and pitching motion.
-2. The lateral-directional model describes side velocity, roll, and yaw about a supplied longitudinal trim condition.
-3. The six-DOF model combines the longitudinal and lateral-directional motion into one 12-state rigid-body simulation.
+2. A reduced nonlinear lateral-directional model about a supplied longitudinal trim condition describes side velocity, roll, and yaw.
+3. The six-DOF model provides full nonlinear 12-state rigid-body dynamics with a simplified coefficient-based aerodynamic model using linear aerodynamic derivatives.
 
 The detailed equations below describe the longitudinal model, which is still the simplest place to understand how the aircraft model is constructed.
 
