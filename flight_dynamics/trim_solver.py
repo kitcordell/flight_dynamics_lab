@@ -4,22 +4,12 @@ import numpy as np
 from scipy.optimize import least_squares
 
 from flight_dynamics.axis_transformations import velocity_to_body
-from flight_dynamics.constants import g
 from flight_dynamics.lateral_dynamics import aircraft_lateral_dynamics
 from flight_dynamics.longitudinal_dynamics import aircraft_longitudinal_dynamics
 from flight_dynamics.six_dof_dynamics import aircraft_six_dof_dynamics
 
 
-# The optimizer works with dimensionless residuals made from these characteristic scales.
-# Linear acceleration is scaled by one g, angular quantities by an order-one rate, and
-# velocity errors by a representative light-aircraft speed.
-DEFAULT_LINEAR_ACCELERATION_SCALE = g          # [ft/s^2]
-DEFAULT_ANGULAR_ACCELERATION_SCALE = 1.0       # [rad/s^2]
-DEFAULT_ANGULAR_RATE_SCALE = 1.0               # [rad/s]
-DEFAULT_VELOCITY_SCALE = 100.0                 # [ft/s]
-
-# A scaled residual norm of 1e-6 corresponds approximately to 3.2e-5 ft/s^2,
-# 1e-6 rad/s^2, or 1e-4 ft/s when one residual component dominates.
+# The optimizer and validation both use the raw physical residuals directly.
 DEFAULT_TRIM_RESIDUAL_TOLERANCE = 1.0e-6
 
 # Values within this relative/absolute fraction of a finite bound are reported.
@@ -34,7 +24,7 @@ class TrimConvergenceError(RuntimeError):
 
 
 def _validate_positive(name, value):
-    """Require a finite positive solver scale or tolerance."""
+    """Require a finite positive solver tolerance."""
     if not np.isfinite(value) or value <= 0.0:
         raise ValueError(f"{name} must be finite and greater than zero")
 
@@ -91,7 +81,6 @@ def _near_bound_names(values, bounds, variable_names, bound_tolerance):
 def _finalize_trim_result(
     sol,
     raw_residuals,
-    residual_scales,
     bounds,
     variable_names,
     residual_tolerance,
@@ -102,21 +91,11 @@ def _finalize_trim_result(
     _validate_positive("bound_tolerance", bound_tolerance)
 
     raw_residuals = np.asarray(raw_residuals, dtype=float)
-    residual_scales = np.asarray(residual_scales, dtype=float)
-
-    if raw_residuals.shape != residual_scales.shape:
-        raise ValueError("raw residuals and residual scales must have the same shape")
-    if not np.all(np.isfinite(residual_scales)) or np.any(residual_scales <= 0.0):
-        raise ValueError("all residual scales must be finite and greater than zero")
-
-    scaled_residuals = raw_residuals / residual_scales
 
     # OptimizeResult supports additional named fields, which keeps the existing SciPy
-    # result interface while exposing physical and scaled diagnostics to callers/tests.
+    # result interface while exposing physical diagnostics to callers and tests.
     sol.raw_residuals = raw_residuals
-    sol.scaled_residuals = scaled_residuals
     sol.raw_residual_norm = float(np.linalg.norm(raw_residuals))
-    sol.scaled_residual_norm = float(np.linalg.norm(scaled_residuals))
     sol.residual_norm = sol.raw_residual_norm
     sol.residual_tolerance = float(residual_tolerance)
     sol.near_bounds = _near_bound_names(
@@ -130,14 +109,14 @@ def _finalize_trim_result(
     sol.trim_valid = bool(
         sol.success
         and np.all(np.isfinite(raw_residuals))
-        and sol.scaled_residual_norm <= residual_tolerance
+        and sol.raw_residual_norm <= residual_tolerance
     )
 
     if not sol.trim_valid:
         raise TrimConvergenceError(
             "Trim solve failed validation: "
             f"success={sol.success}, message={sol.message!s}, "
-            f"scaled residual norm={sol.scaled_residual_norm:.6g}, "
+            f"residual norm={sol.raw_residual_norm:.6g}, "
             f"tolerance={residual_tolerance:.6g}, "
             f"raw residuals={raw_residuals}"
         )
@@ -181,15 +160,6 @@ def level_trim_residuals(unknown, trim_target, aircraft_params):
     return xdot_actual - xdot_desired
 
 
-def _scaled_level_trim_residuals(
-    unknown,
-    trim_target,
-    aircraft_params,
-    residual_scales,
-):
-    return level_trim_residuals(unknown, trim_target, aircraft_params) / residual_scales
-
-
 def longitudinal_trim(
     x0,
     trim_target,
@@ -198,10 +168,6 @@ def longitudinal_trim(
     *,
     residual_tolerance=DEFAULT_TRIM_RESIDUAL_TOLERANCE,
     bound_tolerance=DEFAULT_BOUND_TOLERANCE,
-    linear_acceleration_scale=DEFAULT_LINEAR_ACCELERATION_SCALE,
-    angular_acceleration_scale=DEFAULT_ANGULAR_ACCELERATION_SCALE,
-    angular_rate_scale=DEFAULT_ANGULAR_RATE_SCALE,
-    velocity_scale=DEFAULT_VELOCITY_SCALE,
 ):
     """Solve longitudinal trim and return state, control, and validated result."""
     delta_e_min, delta_e_max = _control_bounds(aircraft_params, "elevator")
@@ -218,19 +184,11 @@ def longitudinal_trim(
     ])
     bounds = (lower_bounds, upper_bounds)
 
-    residual_scales = np.array([
-        linear_acceleration_scale,
-        linear_acceleration_scale,
-        angular_acceleration_scale,
-        angular_rate_scale,
-        velocity_scale,
-    ])
-
     sol = least_squares(
-        _scaled_level_trim_residuals,
+        level_trim_residuals,
         x0,
         bounds=bounds,
-        args=(trim_target, aircraft_params, residual_scales),
+        args=(trim_target, aircraft_params),
         method="dogbox",
     )
 
@@ -243,7 +201,6 @@ def longitudinal_trim(
     sol = _finalize_trim_result(
         sol,
         raw_residuals,
-        residual_scales,
         bounds,
         ("throttle", "elevator", "theta"),
         residual_tolerance,
@@ -322,24 +279,6 @@ def lateral_trim_residuals(unknown, longitudinal_state, trim_target, aircraft_pa
     ])
 
 
-def _scaled_lateral_trim_residuals(
-    unknown,
-    longitudinal_state,
-    trim_target,
-    aircraft_params,
-    residual_scales,
-):
-    return (
-        lateral_trim_residuals(
-            unknown,
-            longitudinal_state,
-            trim_target,
-            aircraft_params,
-        )
-        / residual_scales
-    )
-
-
 def lateral_trim(
     x0,
     longitudinal_state,
@@ -349,9 +288,6 @@ def lateral_trim(
     *,
     residual_tolerance=DEFAULT_TRIM_RESIDUAL_TOLERANCE,
     bound_tolerance=DEFAULT_BOUND_TOLERANCE,
-    linear_acceleration_scale=DEFAULT_LINEAR_ACCELERATION_SCALE,
-    angular_acceleration_scale=DEFAULT_ANGULAR_ACCELERATION_SCALE,
-    velocity_scale=DEFAULT_VELOCITY_SCALE,
 ):
     """Solve lateral trim and return state, control, and validated result."""
     delta_a_min, delta_a_max = _control_bounds(aircraft_params, "aileron")
@@ -371,22 +307,14 @@ def lateral_trim(
     ])
     bounds = (lower_bounds, upper_bounds)
 
-    residual_scales = np.array([
-        linear_acceleration_scale,
-        angular_acceleration_scale,
-        angular_acceleration_scale,
-        velocity_scale,
-    ])
-
     sol = least_squares(
-        _scaled_lateral_trim_residuals,
+        lateral_trim_residuals,
         x0,
         bounds=bounds,
         args=(
             longitudinal_state,
             trim_target,
             aircraft_params,
-            residual_scales,
         ),
         method="dogbox",
     )
@@ -405,7 +333,6 @@ def lateral_trim(
     sol = _finalize_trim_result(
         sol,
         raw_residuals,
-        residual_scales,
         bounds,
         ("aileron", "rudder", "side_velocity", "phi"),
         residual_tolerance,
@@ -489,33 +416,6 @@ def six_dof_trim_residuals(unknown, trim_target, aircraft_params):
     ))
 
 
-def six_dof_trim_residual_scales(
-    linear_acceleration_scale=DEFAULT_LINEAR_ACCELERATION_SCALE,
-    angular_acceleration_scale=DEFAULT_ANGULAR_ACCELERATION_SCALE,
-    velocity_scale=DEFAULT_VELOCITY_SCALE,
-):
-    """Return characteristic scales matching the eight six-DOF residuals."""
-    return np.array([
-        linear_acceleration_scale,
-        linear_acceleration_scale,
-        linear_acceleration_scale,
-        angular_acceleration_scale,
-        angular_acceleration_scale,
-        angular_acceleration_scale,
-        velocity_scale,
-        velocity_scale,
-    ])
-
-
-def _scaled_six_dof_trim_residuals(
-    unknown,
-    trim_target,
-    aircraft_params,
-    residual_scales,
-):
-    return six_dof_trim_residuals(unknown, trim_target, aircraft_params) / residual_scales
-
-
 def six_dof_trim(
     x0,
     trim_target,
@@ -524,9 +424,6 @@ def six_dof_trim(
     *,
     residual_tolerance=DEFAULT_TRIM_RESIDUAL_TOLERANCE,
     bound_tolerance=DEFAULT_BOUND_TOLERANCE,
-    linear_acceleration_scale=DEFAULT_LINEAR_ACCELERATION_SCALE,
-    angular_acceleration_scale=DEFAULT_ANGULAR_ACCELERATION_SCALE,
-    velocity_scale=DEFAULT_VELOCITY_SCALE,
 ):
     """Solve full straight-flight trim and return state, control, and result."""
     delta_e_min, delta_e_max = _control_bounds(aircraft_params, "elevator")
@@ -555,17 +452,11 @@ def six_dof_trim(
     ])
     bounds = (lower_bounds, upper_bounds)
 
-    residual_scales = six_dof_trim_residual_scales(
-        linear_acceleration_scale,
-        angular_acceleration_scale,
-        velocity_scale,
-    )
-
     sol = least_squares(
-        _scaled_six_dof_trim_residuals,
+        six_dof_trim_residuals,
         x0,
         bounds=bounds,
-        args=(trim_target, aircraft_params, residual_scales),
+        args=(trim_target, aircraft_params),
         method="dogbox",
     )
 
@@ -586,7 +477,6 @@ def six_dof_trim(
     sol = _finalize_trim_result(
         sol,
         raw_residuals,
-        residual_scales,
         bounds,
         (
             "throttle",

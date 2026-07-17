@@ -18,7 +18,7 @@ The main goal is to take the equations from flight dynamics and use them to answ
 - Automated pytest validation for trim, control directions, and six-DOF integration
 
 See `docs/PROJECT_STRUCTURE.md` for the repository layout and
-`docs/CONVENTIONS.md` for axes, signs, units, trim scaling, and parameter status.
+`docs/CONVENTIONS.md` for axes, signs, units, trim validation, and parameter status.
 
 ## Running the Project
 
@@ -168,7 +168,7 @@ lateral_trim(x0, longitudinal_state, trim_target, aircraft_params, verbose=True)
 six_dof_trim(x0, trim_target, aircraft_params, verbose=True)
 ```
 
-The SciPy result includes raw and scaled residuals, residual norms, bound-proximity
+The SciPy result includes raw residuals, the raw residual norm, bound-proximity
 information, and a `trim_valid` flag. Invalid high-residual solutions raise
 `TrimConvergenceError`.
 

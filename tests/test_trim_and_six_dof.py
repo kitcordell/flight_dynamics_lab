@@ -15,7 +15,6 @@ from flight_dynamics.trim_solver import (
     lateral_trim,
     longitudinal_trim,
     six_dof_trim,
-    six_dof_trim_residual_scales,
 )
 
 
@@ -57,12 +56,10 @@ def test_six_dof_trim_converges_and_exposes_diagnostics(six_dof_trim_case):
     assert result.success
     assert result.trim_valid
     assert result.raw_residuals.shape == (8,)
-    assert result.scaled_residuals.shape == (8,)
     assert np.isfinite(result.raw_residual_norm)
-    assert np.isfinite(result.scaled_residual_norm)
-
-    expected_scaled = result.raw_residuals / six_dof_trim_residual_scales()
-    np.testing.assert_allclose(result.scaled_residuals, expected_scaled)
+    assert result.residual_norm == result.raw_residual_norm
+    assert not hasattr(result, "scaled_residuals")
+    assert not hasattr(result, "scaled_residual_norm")
     assert np.all(np.isfinite(trim_state))
     assert np.all(np.isfinite(trim_control))
     assert trim_target[0] == pytest.approx(TRIM_SPEED_FPS)

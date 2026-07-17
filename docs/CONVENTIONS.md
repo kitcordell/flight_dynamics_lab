@@ -108,27 +108,20 @@ The elevator travel limits preserve values already present in `control_inputs.py
 No source is recorded for those values or for the provisional aileron and rudder
 limits. These limits provide bounded numerical optimization, not certification data.
 
-## Trim Scaling and Validation
+## Trim Residuals and Validation
 
-The trim solvers optimize dimensionless residuals but expose the raw physical
-residuals on the returned SciPy result:
+The trim solvers pass their raw physical residuals directly to SciPy. No residual
+scaling or nondimensionalization is applied by the solver.
 
-- Linear acceleration scale: one `g` (`32.174 ft/s^2`).
-- Angular acceleration scale: `1 rad/s^2`.
-- Angular-rate scale: `1 rad/s` where applicable.
-- Velocity scale: `100 ft/s`.
-
-The default scaled residual-norm tolerance is `1e-6`. With one dominant residual,
-that corresponds approximately to `3.2e-5 ft/s^2`, `1e-6 rad/s^2`, or `1e-4 ft/s`.
-All scales, the residual tolerance, and the bound-proximity tolerance are named
-constants and configurable solver arguments.
+The default raw residual-norm tolerance is `1e-6`. The residual tolerance and the
+bound-proximity tolerance are named constants and configurable solver arguments.
 
 Each returned `OptimizeResult` exposes:
 
-- `raw_residuals` and `scaled_residuals`
-- `raw_residual_norm` and `scaled_residual_norm`
+- `raw_residuals`
+- `raw_residual_norm` and its `residual_norm` alias
 - `near_bounds` and `at_or_near_bound`
 - `trim_valid`
 
-An unsuccessful solve, nonfinite residual, or scaled residual norm above tolerance
+An unsuccessful solve, nonfinite residual, or raw residual norm above tolerance
 raises `TrimConvergenceError` rather than silently returning an invalid trim state.
