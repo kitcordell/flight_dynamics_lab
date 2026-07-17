@@ -20,7 +20,7 @@ AIRCRAFT_NAME = "C172"
 SIMULATION_DURATION_S = 20.0
 
 # Select one input function for each control surface
-SELECTED_ELEVATOR_INPUT = control_inputs.elevator_deflection
+SELECTED_ELEVATOR_INPUT = control_inputs.neutral_elevator_deflection
 SELECTED_AILERON_INPUT = control_inputs.neutral_aileron_deflection
 SELECTED_RUDDER_INPUT = control_inputs.neutral_rudder_deflection
 
