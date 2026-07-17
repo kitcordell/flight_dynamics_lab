@@ -35,9 +35,7 @@ def aircraft_lateral_dynamics(
     # Theta and altitude remain in the lateral state so their kinematics can be integrated
     U, W, Q, _, _ = longitudinal_state
 
-    # Aircraft geometry and mass properties
-    bw = params["bw"]                     # wing span, [ft]
-    S = params["S"]                       # wing surface area, [ft^2]
+    # Aircraft mass properties
     I_xx = params["I_xx"]                 # roll moment of inertia, [slug*ft^2]
     I_yy = params["I_yy"]                 # pitch moment of inertia, [slug*ft^2]
     I_zz = params["I_zz"]                 # yaw moment of inertia, [slug*ft^2]
@@ -63,10 +61,14 @@ def aircraft_lateral_dynamics(
         params,
     )
 
-    # Convert aerodynamic coefficients into dimensional loads
-    Y = qbar * S * C_Y                 # side force along the body y-axis, [lbf]
-    L_roll = qbar * S * bw * C_l       # rolling moment about the body x-axis, [lbf*ft]
-    N_yaw = qbar * S * bw * C_n        # yawing moment about the body z-axis, [lbf*ft]
+    # Convert the lateral coefficients into dimensional aerodynamic loads
+    side_force, roll_moment, yaw_moment = aero_model.lateral_aero_loads(
+        qbar,
+        params,
+        C_Y,
+        C_l,
+        C_n,
+    )
 
 #%% Equations of motion
     # I_xz couples the roll and yaw accelerations, so they are solved together
@@ -77,15 +79,15 @@ def aircraft_lateral_dynamics(
 
     # Remove the gyroscopic coupling terms from the applied moments
     roll_yaw_rhs = np.array([
-        L_roll - (I_zz - I_yy) * Q * R + I_xz * P * Q,
-        N_yaw - (I_yy - I_xx) * P * Q - I_xz * Q * R,
+        roll_moment - (I_zz - I_yy) * Q * R + I_xz * P * Q,
+        yaw_moment - (I_yy - I_xx) * P * Q - I_xz * Q * R,
     ])
     P_dot, R_dot = np.linalg.solve(roll_yaw_inertia, roll_yaw_rhs) # roll and yaw acceleration
 
     xdot = np.zeros_like(x, dtype=float)       # initialize derivative array
 
     # Body-axis lateral translation
-    xdot[0] = Y / m + g * np.sin(phi) * np.cos(theta) + P * W - R * U # V_dot
+    xdot[0] = side_force / m + g * np.sin(phi) * np.cos(theta) + P * W - R * U # V_dot
 
     # Body-axis angular accelerations
     xdot[1] = P_dot                           # P_dot

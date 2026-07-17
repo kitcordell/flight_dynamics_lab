@@ -83,6 +83,21 @@ def lateral_aero_coefficients(beta, P, R, V_tas, delta_a, delta_r, params):
     # Return the three lateral-directional aerodynamic coefficients
     return C_Y, C_l, C_n
 
+
+def lateral_aero_loads(qbar, params, C_Y, C_l, C_n):
+    """Convert lateral aerodynamic coefficients into dimensional loads."""
+    S = params["S"]                           # wing surface area, [ft^2]
+    bw = params["bw"]                         # wing span, [ft]
+
+    # The side-force coefficient uses wing area as its reference area
+    side_force = qbar * S * C_Y                # body y-axis force, [lbf]
+
+    # The roll and yaw coefficients use wing area and span as their references
+    roll_moment = qbar * S * bw * C_l          # body x-axis moment, [lbf*ft]
+    yaw_moment = qbar * S * bw * C_n           # body z-axis moment, [lbf*ft]
+
+    return side_force, roll_moment, yaw_moment
+
 def aero_loads(qbar, params, C_L, C_D, C_m):
 
 

@@ -27,7 +27,6 @@ def aircraft_six_dof_dynamics(
     throttle, delta_e, delta_a, delta_r = u
 
     # Aircraft geometry
-    bw = params["bw"]                         # wing span, [ft]
     cbar = params["cbar"]                     # average chord, [ft]
     S = params["S"]                           # wing surface area, [ft^2]
 
@@ -76,19 +75,23 @@ def aircraft_six_dof_dynamics(
         params,
     )
 
-    # Convert aerodynamic coefficients into dimensional forces
-    L = qbar * S * C_L                  # total lift, [lbf]
-    D = qbar * S * C_D                  # total drag, [lbf]
-    Y = qbar * S * C_Y                  # body-axis side force, [lbf]
+    # Convert the longitudinal coefficients into dimensional aerodynamic loads
+    lift = qbar * S * C_L                       # total lift, [lbf]
+    drag = qbar * S * C_D                       # total drag, [lbf]
+    pitch_moment = qbar * S * cbar * C_m        # pitching moment, [lbf*ft]
 
-    # Convert moment coefficients into dimensional moments
-    L_roll = qbar * S * bw * C_l        # rolling moment, [lbf*ft]
-    M_pitch = qbar * S * cbar * C_m     # pitching moment, [lbf*ft]
-    N_yaw = qbar * S * bw * C_n         # yawing moment, [lbf*ft]
+    # Convert the lateral coefficients into dimensional aerodynamic loads
+    side_force, roll_moment, yaw_moment = aero_model.lateral_aero_loads(
+        qbar,
+        params,
+        C_Y,
+        C_l,
+        C_n,
+    )
 
     # Resolve lift and drag into the body x-z axes and add thrust
-    X = -D * np.cos(alpha) + L * np.sin(alpha) + thrust # body x-axis force, [lbf]
-    Z = -D * np.sin(alpha) - L * np.cos(alpha)          # body z-axis force, [lbf]
+    body_x_force = -drag * np.cos(alpha) + lift * np.sin(alpha) + thrust # [lbf]
+    body_z_force = -drag * np.sin(alpha) - lift * np.cos(alpha)          # [lbf]
 
 #%% Equations of motion
     # I_xz couples the roll and yaw accelerations, so they are solved together
@@ -99,15 +102,15 @@ def aircraft_six_dof_dynamics(
 
     # Applied roll and yaw moments after removing gyroscopic coupling terms
     roll_yaw_rhs = np.array([
-        L_roll - (I_zz - I_yy) * Q * R + I_xz * P * Q,
-        N_yaw - (I_yy - I_xx) * P * Q - I_xz * Q * R,
+        roll_moment - (I_zz - I_yy) * Q * R + I_xz * P * Q,
+        yaw_moment - (I_yy - I_xx) * P * Q - I_xz * Q * R,
     ])
 
     P_dot, R_dot = np.linalg.solve(roll_yaw_inertia, roll_yaw_rhs) # roll and yaw acceleration
 
     # Pitch acceleration including roll-yaw inertial coupling
     Q_dot = (
-        M_pitch
+        pitch_moment
         - (I_xx - I_zz) * P * R
         - I_xz * (P**2 - R**2)
     ) / I_yy                                      # pitch acceleration, [rad/s^2]
@@ -115,9 +118,9 @@ def aircraft_six_dof_dynamics(
     xdot = np.zeros_like(x, dtype=float)           # initialize derivative array
 
     # Body-axis translational equations
-    xdot[0] = X / m - g * np.sin(theta) + R * V - Q * W                 # U_dot
-    xdot[1] = Y / m + g * np.sin(phi) * np.cos(theta) + P * W - R * U # V_dot
-    xdot[2] = Z / m + g * np.cos(phi) * np.cos(theta) + Q * U - P * V # W_dot
+    xdot[0] = body_x_force / m - g * np.sin(theta) + R * V - Q * W    # U_dot
+    xdot[1] = side_force / m + g * np.sin(phi) * np.cos(theta) + P * W - R * U # V_dot
+    xdot[2] = body_z_force / m + g * np.cos(phi) * np.cos(theta) + Q * U - P * V # W_dot
 
     # Body-axis angular accelerations
     xdot[3] = P_dot                         # P_dot
