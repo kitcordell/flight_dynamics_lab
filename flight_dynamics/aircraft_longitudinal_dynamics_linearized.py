@@ -1,3 +1,5 @@
+"""Linearized longitudinal dynamics work-in-progress."""
+
 import numpy as np
 from flight_dynamics import aero_model, control_inputs, thrust_model
 from flight_dynamics.axis_transformations import aero_to_body

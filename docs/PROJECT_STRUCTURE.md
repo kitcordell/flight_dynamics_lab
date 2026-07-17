@@ -27,7 +27,8 @@ The current C172 longitudinal simulation workflow runs through these modules:
 4. Nonlinear equations of motion: `flight_dynamics/longitudinal_dynamics.py`
 5. Trim solving: `flight_dynamics/trim_solver.py`
 6. Time integration: `flight_dynamics/integrators.py`
-7. Analysis and plotting entry point: `scripts/c172_simulation.py`
+7. Aircraft-independent figure construction: `flight_dynamics/aircraft_plotting.py`
+8. Analysis entry point: `scripts/c172_simulation.py`
 
 ## Core Package
 
@@ -41,22 +42,23 @@ The current C172 longitudinal simulation workflow runs through these modules:
   - Shared physical constants in imperial units.
 
 - `flight_dynamics/control_inputs.py`
-  - Elevator input scheduling functions.
+  - Selectable elevator, aileron, and rudder input functions.
 
 - `flight_dynamics/atmosphere.py`
-  - Standard-atmosphere density, temperature, and pressure calculation.
+  - Standard-atmosphere density, temperature, pressure, and speed-of-sound calculations.
 
 - `flight_dynamics/conversions.py`
   - Unit conversions, including knots, horsepower, and IAS-to-TAS helpers.
 
-- `flight_dynamics/speed_of_sound.py`
-  - Speed-of-sound helper used by airspeed conversion.
+- `flight_dynamics/external_data.py`
+  - Loads external comparison data and converts source-specific columns into model units.
+  - Contains the X-Plane longitudinal and rate-of-climb reference-data loaders.
 
 - `flight_dynamics/axis_transformations.py`
   - Body-axis and velocity-axis conversion helpers.
 
 - `flight_dynamics/aero_model.py`
-  - Lift, drag, induced drag, and pitching-moment coefficient functions.
+  - Longitudinal and lateral-directional aerodynamic coefficient functions.
 
 - `flight_dynamics/thrust_model.py`
   - Naturally aspirated piston-engine available-power and thrust helpers.
@@ -64,30 +66,53 @@ The current C172 longitudinal simulation workflow runs through these modules:
 - `flight_dynamics/longitudinal_dynamics.py`
   - Core nonlinear longitudinal equations of motion.
 
+- `flight_dynamics/lateral_dynamics.py`
+  - Nonlinear lateral-directional equations of motion.
+  - Holds the longitudinal states at values supplied by an explicit longitudinal trim state.
+
+- `flight_dynamics/six_dof_dynamics.py`
+  - Full nonlinear 12-state rigid-body equations of motion.
+  - Uses the shared longitudinal and lateral-directional aerodynamic coefficient functions.
+
 - `flight_dynamics/trim_solver.py`
-  - Level and climb trim solvers plus maximum-rate-of-climb sweep.
+  - Longitudinal, lateral-directional, and full six-DOF straight-flight trim solvers.
+  - The lateral solver trims side velocity, bank angle, aileron, and rudder.
+  - Solves the six-DOF control inputs, aerodynamic angles, bank angle, and pitch angle.
 
-- `flight_dynamics/drag_polar.py`
-  - Drag-polar, power-required, power-available, and maximum-speed helpers.
+- `flight_dynamics/mechanics.py`
+  - Drag-polar, power-required, power-available, and single-altitude maximum-speed helpers.
+  - Excess-power rate-of-climb calculations and altitude/speed sweeps.
 
-- `flight_dynamics/rate_of_climb_solver.py`
-  - Excess-power rate-of-climb helpers used by the alternate ROC script.
+- `flight_dynamics/performance_solver.py`
+  - Maximum-airspeed calculations for a single altitude or an altitude range.
+  - Dynamics-trim rate-of-climb calculations and airspeed/altitude sweeps.
+  - Returns numerical results and can optionally pass them to the general plotting module.
 
 - `flight_dynamics/integrators.py`
   - Euler, RK2, and RK4 integrators.
 
-- `flight_dynamics/plot_theme.py`
-  - Plot styling used by the scripts.
+- `flight_dynamics/aircraft_plotting.py`
+  - Reusable figure builders for aircraft performance and simulation comparisons.
+  - Combines maximum airspeed and rate-of-climb results in one performance-limits window.
+  - Accepts an aircraft name and prepared datasets rather than depending on a specific aircraft model.
 
 ## Entry Points
 
 - `scripts/c172_simulation.py`
   - Main working script for the C172 project.
-  - Generates max-speed, rate-of-climb, drag-polar, trim, and nonlinear longitudinal comparison plots.
-  - Loads comparison data from `data/`.
+  - Computes max-speed, rate-of-climb, drag-polar, trim, and nonlinear longitudinal results.
+  - Selects the aircraft display name once and passes prepared results to
+    `flight_dynamics/aircraft_plotting.py` for plotting.
+  - Set `AIRCRAFT_NAME` to match the aircraft model and reference datasets being used.
+  - Loads X-Plane comparison data through `flight_dynamics/external_data.py`.
 
 - `scripts/c172_excess_power_ROC.py`
   - Alternate excess-power rate-of-climb analysis script.
+
+- `scripts/c172_six_dof_simulation.py`
+  - Solves the full six-DOF trim condition directly from configurable initial guesses.
+  - Adds a bank-angle perturbation after trim is solved.
+  - Integrates and plots the C172 six-degree-of-freedom response.
 
 ## Side Studies
 

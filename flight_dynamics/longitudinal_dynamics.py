@@ -8,7 +8,14 @@ from flight_dynamics.constants import g
 # x: aircraft state
 # u: control input
 # params: aircraft parameters
-def aircraft_longitudinal_dynamics(t,x,u,params):
+# control_input: selected elevator input function from control_inputs.py
+def aircraft_longitudinal_dynamics(
+    t,
+    x,
+    u,
+    params,
+    control_input=control_inputs.elevator_deflection,
+):
     U, W, Q, theta, alt = x     # forward and vertical body axis velocities, pitch angle, altitude states
     throttle, delta_e = u       # throttle and elevator deflection input states
 
@@ -34,7 +41,9 @@ def aircraft_longitudinal_dynamics(t,x,u,params):
     alpha = np.arctan2(W,U)                 # AOA
 
 #%% Aicraft Control Inputs
-    delta_e = control_inputs.elevator_deflection(t, delta_e)
+
+    # Apply the elevator input function selected by the calling script
+    delta_e = control_input(t, delta_e)
     thrust = thrust_model.thrust_piston_na(throttle, V, alt, params)
 #%% Calculate forces and moments
     C_L, C_D,_ , C_m = aero_model.aero_coefficients(alpha, delta_e, Q, V, params)

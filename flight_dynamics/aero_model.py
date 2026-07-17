@@ -39,6 +39,50 @@ def aero_coefficients(alpha, delta_e, Q, V, params):
     C_m = moment_coefficient(alpha, delta_e, Q, V, params)
     return C_L, C_D, C_D_i, C_m
 
+
+def lateral_aero_coefficients(beta, P, R, V_tas, delta_a, delta_r, params):
+    """Calculate side-force, rolling-moment, and yawing-moment coefficients."""
+    # The nondimensional angular-rate terms divide by true airspeed
+    if V_tas <= 0.0:
+        raise ValueError("True airspeed must be greater than zero")
+
+    bw = params["bw"]                         # wing span, [ft]
+    p_hat = P * bw / (2.0 * V_tas)            # nondimensional roll rate
+    r_hat = R * bw / (2.0 * V_tas)            # nondimensional yaw rate
+
+    # Side-force coefficient from sideslip, angular rates, aileron, and rudder
+    C_Y = (
+        params["C_Y_0"]
+        + params["C_Y_beta"] * beta
+        + params["C_Y_p"] * p_hat
+        + params["C_Y_r"] * r_hat
+        + params["C_Y_delta_a"] * delta_a
+        + params["C_Y_delta_r"] * delta_r
+    )
+
+    # Rolling-moment coefficient from sideslip, angular rates, and controls
+    C_l = (
+        params["C_l_0"]
+        + params["C_l_beta"] * beta
+        + params["C_l_p"] * p_hat
+        + params["C_l_r"] * r_hat
+        + params["C_l_delta_a"] * delta_a
+        + params["C_l_delta_r"] * delta_r
+    )
+
+    # Yawing-moment coefficient from sideslip, angular rates, and controls
+    C_n = (
+        params["C_n_0"]
+        + params["C_n_beta"] * beta
+        + params["C_n_p"] * p_hat
+        + params["C_n_r"] * r_hat
+        + params["C_n_delta_a"] * delta_a
+        + params["C_n_delta_r"] * delta_r
+    )
+
+    # Return the three lateral-directional aerodynamic coefficients
+    return C_Y, C_l, C_n
+
 def aero_loads(qbar, params, C_L, C_D, C_m):
 
 
